@@ -11,27 +11,16 @@ import (
 )
 
 type SSHConfig struct {
-	SSHHostPortMin    uint   `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    uint   `mapstructure:"ssh_host_port_max"`
 	SSHKeyPath        string `mapstructure:"ssh_key_path"`
 	SSHPassword       string `mapstructure:"ssh_password"`
 	SSHPort           uint   `mapstructure:"ssh_port"`
 	SSHUser           string `mapstructure:"ssh_username"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
-	SSHSkipNatMapping bool   `mapstructure:"ssh_skip_nat_mapping"`
 
 	SSHWaitTimeout time.Duration
 }
 
 func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if c.SSHHostPortMin == 0 {
-		c.SSHHostPortMin = 2222
-	}
-
-	if c.SSHHostPortMax == 0 {
-		c.SSHHostPortMax = 4444
-	}
-
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
 	}
@@ -62,11 +51,6 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 		} else if _, err := commonssh.FileSigner(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
-	}
-
-	if c.SSHHostPortMin > c.SSHHostPortMax {
-		errs = append(errs,
-			errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
 
 	if c.SSHUser == "" {
