@@ -15,48 +15,49 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	diskFullPaths := []string{"foo"}
-	state.Put("disk_full_paths", diskFullPaths)
+	// Set up the path to the build directory
+	buildDir := "foopath"
+	state.Put("build_dir", buildDir)
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
+		t.Fatalf("Bad action: %v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
-		t.Fatal("should NOT have error")
+		t.Fatal("Should NOT have error")
 	}
 
 	// Test the driver
-	if !driver.CompactDiskCalled {
-		t.Fatal("should've called")
+	if !driver.CompactDisks_Called {
+		t.Fatal("Should have called CompactDisks")
 	}
-	if driver.CompactDiskPath != "foo" {
-		t.Fatal("should call with right path")
+	if driver.CompactDisks_Path != buildDir {
+		t.Fatalf("Should call with correct path. Got: %s Wanted: %s", driver.CompactDisks_Path, buildDir)
 	}
 }
 
 func TestStepCompactDisk_skip(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
-	step.Skip = true
+	step.SkipCompaction = true
 
-	diskFullPaths := []string{"foo"}
-	state.Put("disk_full_paths", diskFullPaths)
+	// Set up the path to the build directory
+	state.Put("build_dir", "foopath")
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
+		t.Fatalf("Bad action: %v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
-		t.Fatal("should NOT have error")
+		t.Fatalf("Should NOT have error")
 	}
 
 	// Test the driver
-	if driver.CompactDiskCalled {
-		t.Fatal("should not have called")
+	if driver.CompactDisks_Called {
+		t.Fatal("Should NOT have called CompactDisks")
 	}
 }
