@@ -2,11 +2,11 @@
 modeline: |
   vim: set ft=pandoc:
 description: |
-    The Hyper-V Packer builder is able to create Hyper-V virtual machines and
-    export them.
+  The Hyper-V Packer builder is able to create Hyper-V virtual machines and
+  export them.
 layout: docs
-page_title: 'Hyper-V ISO - Builders'
-sidebar_current: 'docs-builders-hyperv-iso'
+page_title: Hyper-V ISO - Builders
+sidebar_current: docs-builders-hyperv-iso
 ---
 
 # Hyper-V Builder (from an ISO)
@@ -50,15 +50,15 @@ power off the VM.
 
 ## ISO Configuration Reference
 
-<%= partial "partials/common/ISOConfig" %>
+@include 'partials/common/ISOConfig.mdx'
 
 ### Required:
 
-<%= partial "partials/common/ISOConfig-required" %>
+@include 'partials/common/ISOConfig-required.mdx'
 
 ### Optional:
 
-<%= partial "partials/common/ISOConfig-not-required" %>
+@include 'partials/common/ISOConfig-not-required.mdx'
 
 ## Configuration Reference
 
@@ -72,44 +72,46 @@ builder.
 
 ### Optional:
 
--   `output_directory` (string) - This setting specifies the directory that
-    artifacts from the build, such as the virtual machine files and disks,
-    will be output to. The path to the directory may be relative or
-    absolute. If relative, the path is relative to the working directory
-    `packer` is executed from. This directory must not exist or, if
-    created, must be empty prior to running the builder. By default this is
-    "output-BUILDNAME" where "BUILDNAME" is the name of the build.
+- `output_directory` (string) - This setting specifies the directory that
+  artifacts from the build, such as the virtual machine files and disks,
+  will be output to. The path to the directory may be relative or
+  absolute. If relative, the path is relative to the working directory
+  `packer` is executed from. This directory must not exist or, if
+  created, must be empty prior to running the builder. By default this is
+  "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
-<%= partial "partials/builder/hyperv/iso/Config-not-required" %>
-<%= partial "partials/builder/hyperv/common/CommonConfig-not-required" %>
+@include 'partials/builder/hyperv/iso/Config-not-required.mdx'
+@include 'partials/builder/hyperv/common/CommonConfig-not-required.mdx'
 
 ## Http directory configuration reference
 
-<%= partial "partials/common/HTTPConfig" %>
+@include 'partials/common/HTTPConfig.mdx'
+
 ### Optional:
 
-<%= partial "partials/common/HTTPConfig-not-required" %>
+@include 'partials/common/HTTPConfig-not-required.mdx'
 
 ## Shutdown configuration reference
 
 ### Optional:
 
-<%= partial "partials/common/shutdowncommand/ShutdownConfig-not-required" %>
+@include 'partials/common/shutdowncommand/ShutdownConfig-not-required.mdx'
 
 ## Floppy configuration reference
 
-<%= partial "partials/common/FloppyConfig" %>
+@include 'partials/common/FloppyConfig.mdx'
 
 ### Optional:
 
-<%= partial "partials/common/FloppyConfig-not-required" %>
+@include 'partials/common/FloppyConfig-not-required.mdx'
 
 ## Boot Configuration Reference
 
-<%= partial "partials/common/bootcommand/BootConfig" %>
+@include 'partials/common/bootcommand/BootConfig.mdx'
 
 ### Optional:
-<%= partial "partials/common/bootcommand/BootConfig-not-required" %>
+
+@include 'partials/common/bootcommand/BootConfig-not-required.mdx'
 
 ## Integration Services
 
@@ -135,7 +137,7 @@ mkisofs](http://opensourcepack.blogspot.co.uk/p/cdrtools.html) available.
 Below is a working PowerShell script that can be used to create a Windows
 answer ISO:
 
-``` powershell
+```powershell
 $isoFolder = "answer-iso"
 if (test-path $isoFolder){
   remove-item $isoFolder -Force -Recurse
@@ -177,7 +179,7 @@ Packer config:
 {
   "builders": [
     {
-      "vm_name":"windows2012r2",
+      "vm_name": "windows2012r2",
       "type": "hyperv-iso",
       "disk_size": 61440,
       "floppy_files": [],
@@ -186,29 +188,27 @@ Packer config:
       ],
       "http_directory": "./windows/common/http/",
       "boot_wait": "0s",
-      "boot_command": [
-        "a<wait>a<wait>a"
-      ],
+      "boot_command": ["a<wait>a<wait>a"],
       "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
       "iso_checksum_type": "md5",
       "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
-      "communicator":"winrm",
+      "communicator": "winrm",
       "winrm_username": "vagrant",
       "winrm_password": "vagrant",
-      "winrm_timeout" : "4h",
+      "winrm_timeout": "4h",
       "shutdown_command": "f:\\run-sysprep.cmd",
       "memory": 4096,
       "cpus": 4,
       "generation": 2,
-      "switch_name":"LAN",
-      "enable_secure_boot":true
+      "switch_name": "LAN",
+      "enable_secure_boot": true
     }
   ],
   "provisioners": [
     {
       "type": "powershell",
-      "elevated_user":"vagrant",
-      "elevated_password":"vagrant",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant",
       "scripts": [
         "./windows/common/install-7zip.ps1",
         "./windows/common/install-chef.ps1",
@@ -231,7 +231,7 @@ Packer config:
 
 autounattend.xml:
 
-``` xml
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="windowsPE">
@@ -632,7 +632,7 @@ Finish Setup cache proxy during installation -->
 
 sysprep-unattend.xml:
 
-``` xml
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="generalize">
@@ -717,17 +717,17 @@ virtual switch with an `External` connection type.
   },
   "builders": [
     {
-      "vm_name":"{{user `vm_name`}}",
+      "vm_name": "{{user `vm_name`}}",
       "type": "hyperv-iso",
       "disk_size": "{{user `disk_size`}}",
       "guest_additions_mode": "disable",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_checksum": "{{user `iso_checksum`}}",
-      "communicator":"ssh",
+      "communicator": "ssh",
       "ssh_username": "packer",
       "ssh_password": "packer",
-      "ssh_timeout" : "4h",
+      "ssh_timeout": "4h",
       "http_directory": "./",
       "boot_wait": "5s",
       "boot_command": [
@@ -755,7 +755,7 @@ virtual switch with an `External` connection type.
 
 ### preseed.cfg:
 
-``` text
+```text
 ## Options to set on the command line
 d-i debian-installer/locale string en_US.utf8
 d-i console-setup/ask_detect boolean false
@@ -826,7 +826,7 @@ d-i pkgsel/update-policy select none
 choose-mirror-bin mirror/http/proxy string
 ```
 
--> **Note for *nix guests:** Please note that packer requires the VM to be
+-> **Note for \*nix guests:** Please note that packer requires the VM to be
 running a hyper-v KVP daemon in order to detect the IP address of the guest VM.
 On RHEL based machines this may require installing the package `hyperv-daemons`
 and ensuring the `hypervkvpd` service is started at boot. On Debian based
