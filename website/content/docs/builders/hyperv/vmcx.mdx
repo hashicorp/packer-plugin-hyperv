@@ -1,42 +1,54 @@
 ---
 modeline: |
   vim: set ft=pandoc:
-description: |
-  The Hyper-V Packer builder is able to create Hyper-V virtual machines and
-  export them.
-layout: docs
-page_title: Hyper-V ISO - Builders
-sidebar_title: ISO
+description: >-
+  The Hyper-V Packer builder is able to clone an existing Hyper-V virtual
+  machine and export them.
+page_title: Hyper-V Builder (from a vmcx)
+sidebar_title: VMCX
 ---
 
-# Hyper-V Builder (from an ISO)
+# Hyper-V Builder (from a vmcx)
 
-Type: `hyperv-iso`
+Type: `hyperv-vmcx`
 
-The Hyper-V Packer builder is able to create
+The Hyper-V Packer builder is able to use exported virtual machines or clone
+existing
 [Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
-virtual machines and export them, starting from an ISO image.
+virtual machines.
 
-The builder builds a virtual machine by creating a new virtual machine from
-scratch. Typically, the VM is booted, an OS is installed, and software is
-provisioned within the OS. Finally the VM is shut down. The result of the
-Hyper-V builder is a directory containing all the files necessary to run
-the virtual machine portably.
+Typically, the builder imports or clones an existing virtual machine,
+boots it, provisions software within the OS, and then shuts it down. The
+result of the Hyper-V builder is a directory containing all the files
+necessary to run the virtual machine portably.
 
-## Basic Example
+## Basic Examples
 
-Here is a basic example. This example is not functional. It will start the OS
-installer but then fail because we don't provide the preseed file for Ubuntu
-to self-install. Still, the example serves to show the basic configuration:
+Here are some basic examples. Neither example would really do anything more
+than producing a copy of the source virtual machine. However, the examples
+could be used as a starting point for more advanced templates.
+
+Import from folder:
 
 ```json
 {
-  "type": "hyperv-iso",
-  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
-  "iso_checksum": "md5:769474248a3897f4865817446f9a4a53",
+  "type": "hyperv-vmcx",
+  "clone_from_vmcx_path": "c:/path/to/ubuntu-12.04.5-server-amd64",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+}
+```
+
+Clone from existing virtual machine:
+
+```json
+{
+  "clone_from_vm_name": "ubuntu-12.04.5-server-amd64",
+  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
+  "ssh_password": "packer",
+  "ssh_username": "packer",
+  "type": "hyperv-vmcx"
 }
 ```
 
@@ -46,6 +58,16 @@ changes made to the VMs file system may not be fully synced, possibly
 leading to corruption of files or lost changes. As such, it is important to
 add a `shutdown_command`. This tells Packer how to safely shutdown and
 power off the VM.
+
+## Configuration Reference
+
+There are many configuration options available for the Hyper-V builder. They
+are organized below into two categories: required and optional. Within each
+category, the available options are alphabetized and described.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
 
 ## ISO Configuration Reference
 
@@ -59,55 +81,26 @@ power off the VM.
 
 @include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
 
-## Configuration Reference
+### Required for virtual machine import:
 
-There are many configuration options available for the Hyper-V builder. They
-are organized below into two categories: required and optional. Within each
-category, the available options are alphabetized and described.
+- `clone_from_vmcx_path` (string) - The path to a directory containing a
+  previously exported virtual machine. The exported machine will be used
+  as the source for new VM.
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator) can be configured for this
-builder.
+  note: You should provide the named directory that contains the
+  "Virtual Machines", "Snapshots", and/or "Virtual Hard Disks" subdirectories,
+  not the .vmcx file itself.
+
+### Required for virtual machine clone:
+
+- `clone_from_vm_name` (string) - The name of the VM to clone from. Ideally
+  the machine to clone from should be shutdown.
 
 ### Optional:
 
-- `output_directory` (string) - This setting specifies the directory that
-  artifacts from the build, such as the virtual machine files and disks,
-  will be output to. The path to the directory may be relative or
-  absolute. If relative, the path is relative to the working directory
-  `packer` is executed from. This directory must not exist or, if
-  created, must be empty prior to running the builder. By default this is
-  "output-BUILDNAME" where "BUILDNAME" is the name of the build.
-
-@include 'builder/hyperv/iso/Config-not-required.mdx'
+@include 'builder/hyperv/vmcx/Config-not-required.mdx'
 
 @include 'builder/hyperv/common/CommonConfig-not-required.mdx'
-
-## Http directory configuration reference
-
-@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
-
-### Optional:
-
-@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
-
-## Shutdown configuration reference
-
-### Optional:
-
-@include 'packer-plugin-sdk/shutdowncommand/ShutdownConfig-not-required.mdx'
-
-## Floppy configuration reference
-
-@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig.mdx'
-
-### Optional:
-
-@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig-not-required.mdx'
-
-### CD configuration reference
-
-@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
 
 ## Communicator configuration reference
 
@@ -125,13 +118,57 @@ builder.
 
 @include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
 
-## Boot Configuration Reference
+### CD configuration
 
-@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
+
+## Boot Command
+
+The `boot_command` configuration is very important: it specifies the keys to
+type when the virtual machine is first booted in order to start the OS
+installer. This command is typed after `boot_wait`, which gives the virtual
+machine some time to actually load the ISO.
+
+As documented above, the `boot_command` is an array of strings. The strings
+are all typed in sequence. It is an array only to improve readability within
+the template.
+
+The boot command is "typed" character for character over the virtual keyboard
+to the machine, simulating a human actually typing the keyboard.
+
+@include 'builders/boot-command.mdx'
+
+The example shown below is a working boot command used to start an Ubuntu
+12.04 installer:
+
+```json
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+## Http directory configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
 
 ### Optional:
 
-@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 
 ## Integration Services
 
@@ -142,8 +179,8 @@ for the version of Hyper-V that is running.
 
 Floppy drives are no longer supported by generation 2 machines. This requires
 you to take another approach when dealing with preseed or answer files. Two
-possible options are using your own virtual DVD drives, the cd_files option,
-or using Packer's built in web server.
+possible options are using the `cd_files` option or using Packer's built in web
+server.
 
 When dealing with Windows you need to enable UEFI drives for generation 2
 virtual machines.
@@ -727,11 +764,11 @@ virtual switch with an `External` connection type.
 {
   "variables": {
     "vm_name": "ubuntu-xenial",
-    "cpus": "2",
+    "cpu": "2",
     "memory": "1024",
     "disk_size": "21440",
-    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.6-server-amd64.iso",
-    "iso_checksum": "sha1:056b7c15efc15bbbf40bf1a9ff1a3531fcbf70a2"
+    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
+    "iso_checksum": "sha1:DE5EE8665048F009577763EFBF4A6F0558833E59"
   },
   "builders": [
     {
@@ -762,7 +799,7 @@ virtual switch with an `External` connection type.
       ],
       "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
       "memory": "{{user `memory`}}",
-      "cpus": "{{user `cpus`}}",
+      "cpu": "{{user `cpu`}}",
       "generation": 2,
       "enable_secure_boot": false
     }
@@ -842,20 +879,3 @@ d-i pkgsel/update-policy select none
 
 choose-mirror-bin mirror/http/proxy string
 ```
-
--> **Note for \*nix guests:** Please note that packer requires the VM to be
-running a hyper-v KVP daemon in order to detect the IP address of the guest VM.
-On RHEL based machines this may require installing the package `hyperv-daemons`
-and ensuring the `hypervkvpd` service is started at boot. On Debian based
-machines, you may need `linux-cloud-tools-common` for `hv_kvp_daemon`. Failure
-to do this may cause packer to wait at `Waiting for SSH to become available...`
-before eventually timing out.
-
-Also note that while the operating system is still being installed by a preseed
-file, it is normal to see `Waiting for SSH/WinRM to be available` and
-`Error getting SSH/WinRM host: No ip address` error messages until the system
-is actually installed and ready to be connected to.
-
-For more information about the hyper-v daemons and supported distributions, see
-the Microsoft docs at
-https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/supported-linux-and-freebsd-virtual-machines-for-hyper-v-on-windows
