@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
-	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
+	powershell "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell"
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell/hyperv"
 )
 
 const (

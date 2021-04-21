@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/packer/builder/hyperv/common/powershell"
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell"
 )
 
 type scriptOptions struct {

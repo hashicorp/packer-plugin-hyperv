@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	hypervcommon "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common"
 )
 
 func testConfig() map[string]interface{} {
@@ -354,7 +354,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 
-	floppies_path := "../../test-fixtures/floppies"
+	floppies_path := "testdata/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
 	_, warns, err = b.Prepare(config)

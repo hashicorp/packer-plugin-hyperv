@@ -21,7 +21,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/shutdowncommand"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	hypervcommon "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common"
 )
 
 const (
