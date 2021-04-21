@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"testing"
 
+	hypervcommon "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	hypervcommon "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common"
 )
 
 func testConfig() map[string]interface{} {

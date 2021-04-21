@@ -36,6 +36,7 @@ Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath
 	// We should never get here thanks to good template validation, but it's
 	// good to fail rather than trying to run the ps script and erroring.
 	opts.Generation = uint(2)
+	//nolint
 	scriptString, err = getCreateVMScript(&opts)
 	if err == nil {
 		t.Fatalf("Should have Error: %s", err.Error())

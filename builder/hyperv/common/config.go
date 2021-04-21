@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
+	powershell "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell"
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell/hyperv"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	powershell "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell"
-	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell/hyperv"
 )
 
 const (
@@ -348,7 +348,7 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 		warns = Appendwarns(warns, warning)
 	}
 
-	if errs != nil && len(errs) > 0 {
+	if len(errs) > 0 {
 		return errs, warns
 	}
 

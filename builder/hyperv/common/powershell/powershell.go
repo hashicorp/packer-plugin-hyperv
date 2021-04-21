@@ -328,7 +328,7 @@ return $generation
 		return 0, err
 	}
 
-	generationUint32, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 32)
+	generationUint32, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 32)
 
 	if err != nil {
 		return 0, err
