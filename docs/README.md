@@ -1,13 +1,18 @@
-# Scaffolding Plugins
+# Hyper-V Plugins
 
-<!--
-  Include a short overview about the plugin.
+The HyperV Packer Plugin is able to create
+[Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
+virtual machines and export them.
 
-  This document is a great location for creating a table of contents for each
-  of the components the plugin may provide. This document should load automatically
-  when navigating to the docs directory for a plugin.
+- [hyperv-iso](/docs/builders/hyperv-iso.mdx) - Starts from an ISO file,
+  creates a brand new Hyper-V VM, installs an OS, provisions software within
+  the OS, then exports that machine to create an image. This is best for
+  people who want to start from scratch.
 
--->
+- [hyperv-vmcx](/docs/builders/hyperv-vmcx.mdx) - Clones an an existing
+  virtual machine, provisions software within the OS, then exports that
+  machine to create an image. This is best for people who have existing base
+  images and want to customize them.
 
 ## Installation
 
@@ -50,29 +55,3 @@ directory. Upon successful compilation, a `packer-plugin-name` plugin
 binary file can be found in the root directory.
 To install the compiled plugin, please follow the official Packer documentation
 on [installing a plugin](https://www.packer.io/docs/extending/plugins/#installing-plugins).
-
-
-## Plugin Contents
-
-The Scaffolding plugin is intended as a starting point for creating Packer plugins, containing:
-
-### Builders
-
-- [builder](/docs/builders/builder-name.mdx) - The scaffolding builder is used to create endless Packer
-  plugins using a consistent plugin structure.
-
-### Provisioners
-
-- [provisioner](/docs/provisioners/provisioner-name.mdx) - The scaffolding provisioner is used to provisioner
-  Packer builds.
-
-### Post-processors
-
-- [post-processor](/docs/post-processors/postprocessor-name.mdx) - The scaffolding post-processor is used to
-  export scaffolding builds.
-
-### Data Sources
-
-- [data source](/docs/datasources/datasource-name.mdx) - The scaffolding data source is used to
-  export scaffolding data.
-
