@@ -61,6 +61,8 @@ type Config struct {
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
 	hypervcommon.CommonConfig      `mapstructure:",squash"`
 	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
+	// Disable automatic shut down of the virtual machine.
+	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
 	// The size, in megabytes, of the hard disk to create
 	// for the VM. By default, this is 40 GB.
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
@@ -302,8 +304,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 
 		&hypervcommon.StepShutdown{
-			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
+			Command:         b.config.ShutdownCommand,
+			Timeout:         b.config.ShutdownTimeout,
+			DisableShutdown: b.config.DisableShutdown,
 		},
 
 		// wait for the vm to be powered off

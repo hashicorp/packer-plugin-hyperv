@@ -52,7 +52,8 @@ type Config struct {
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
 	hypervcommon.CommonConfig      `mapstructure:",squash"`
 	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
-
+	// Disable automatic shut down of the virtual machine.
+	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
 	// This is the path to a directory containing an exported virtual machine.
 	CloneFromVMCXPath string `mapstructure:"clone_from_vmcx_path"`
 	// This is the name of the virtual machine to clone from.
@@ -342,8 +343,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 
 		&hypervcommon.StepShutdown{
-			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
+			Command:         b.config.ShutdownCommand,
+			Timeout:         b.config.ShutdownTimeout,
+			DisableShutdown: b.config.DisableShutdown,
 		},
 
 		// wait for the vm to be powered off
