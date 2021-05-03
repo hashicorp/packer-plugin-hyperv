@@ -61,7 +61,12 @@ type Config struct {
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
 	hypervcommon.CommonConfig      `mapstructure:",squash"`
 	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
-	// Disable automatic shut down of the virtual machine.
+	// Packer normally halts the virtual machine after all provisioners have
+	// run when no `shutdown_command` is defined. If this is set to `true`, Packer
+	// *will not* halt the virtual machine but will assume that the VM will shut itself down
+	// when it's done, via the preseed.cfg or your final provisioner.
+	// Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
+	// The timeout can be changed using the `shutdown_timeout` option.
 	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
 	// The size, in megabytes, of the hard disk to create
 	// for the VM. By default, this is 40 GB.

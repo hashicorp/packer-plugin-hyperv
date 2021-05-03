@@ -70,26 +70,40 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	// Wait for the machine to actually shut down
 	log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
 	shutdownTimer := time.After(s.Timeout)
-	for {
-		running, _ := driver.IsRunning(vmName)
-		if !running {
-			break
-		}
 
+	waitRunning := make(chan bool, 1)
+	go func() {
+		// loop until the VM has shut down.
+		for {
+			running, _ := driver.IsRunning(vmName)
+			if !running {
+				waitRunning <- true
+				return
+			}
+
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
+
+	for {
+		// Wait for the shutdown timeout to elapse, an interrupt, or the VM to be shut down.
 		select {
 		case <-shutdownTimer:
-			//log.Printf("Shutdown stdout: %s", stdout.String())
-			//log.Printf("Shutdown stderr: %s", stderr.String())
 			err := errors.New("Timeout while waiting for machine to shut down.")
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		case <-ctx.Done():
+			// The step sequence was cancelled, so cancel the halt wait and just exit.
+			log.Println("[WARN] Interrupt detected, quitting waiting for shutdown.")
+			return multistep.ActionHalt
+		case <-waitRunning:
+			log.Println("VM shut down.")
+			return multistep.ActionContinue
 		default:
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
-	log.Println("VM shut down.")
-	return multistep.ActionContinue
 }
 
 func (s *StepShutdown) Cleanup(state multistep.StateBag) {}
