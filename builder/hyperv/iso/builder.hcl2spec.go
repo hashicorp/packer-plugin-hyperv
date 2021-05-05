@@ -115,6 +115,7 @@ type FlatConfig struct {
 	BootOrder                      []string          `mapstructure:"boot_order" required:"false" cty:"boot_order" hcl:"boot_order"`
 	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command" hcl:"shutdown_command"`
 	ShutdownTimeout                *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
+	DisableShutdown                *bool             `mapstructure:"disable_shutdown" required:"false" cty:"disable_shutdown" hcl:"disable_shutdown"`
 	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	UseLegacyNetworkAdapter        *bool             `mapstructure:"use_legacy_network_adapter" required:"false" cty:"use_legacy_network_adapter" hcl:"use_legacy_network_adapter"`
 	DifferencingDisk               *bool             `mapstructure:"differencing_disk" required:"false" cty:"differencing_disk" hcl:"differencing_disk"`
@@ -238,6 +239,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_order":                       &hcldec.AttrSpec{Name: "boot_order", Type: cty.List(cty.String), Required: false},
 		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
+		"disable_shutdown":                 &hcldec.AttrSpec{Name: "disable_shutdown", Type: cty.Bool, Required: false},
 		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"use_legacy_network_adapter":       &hcldec.AttrSpec{Name: "use_legacy_network_adapter", Type: cty.Bool, Required: false},
 		"differencing_disk":                &hcldec.AttrSpec{Name: "differencing_disk", Type: cty.Bool, Required: false},
