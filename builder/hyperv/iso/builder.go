@@ -259,8 +259,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Generation:         b.config.Generation,
 		},
 		&commonsteps.StepCreateCD{
-			Files: b.config.CDConfig.CDFiles,
-			Label: b.config.CDConfig.CDLabel,
+			Files:   b.config.CDConfig.CDFiles,
+			Content: b.config.CDConfig.CDContent,
+			Label:   b.config.CDConfig.CDLabel,
 		},
 		&hypervcommon.StepMountSecondaryDvdImages{
 			IsoPaths:   b.config.SecondaryDvdImages,
