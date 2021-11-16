@@ -3,11 +3,16 @@ package common
 import (
 	"context"
 	"os"
-	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
+)
+
+var (
+	expectedBuildDirPattern = `hyperv[[:digit:]]+$`
+	expectedBuildDirRe      = regexp.MustCompile(expectedBuildDirPattern)
 )
 
 func TestStepCreateBuildDir_imp(t *testing.T) {
@@ -31,18 +36,21 @@ func TestStepCreateBuildDir_Defaults(t *testing.T) {
 		t.Fatal("Should NOT have error")
 	}
 
-	if v, ok := state.GetOk("build_dir"); !ok {
+	v, ok := state.GetOk("build_dir")
+	if !ok {
 		t.Fatal("Should store path to build directory in statebag as 'build_dir'")
-	} else {
-		// On windows convert everything to forward slash separated paths
-		// This prevents the regexp interpreting backslashes as escape sequences
-		stateBuildDir := filepath.ToSlash(v.(string))
-		expectedBuildDirRe := regexp.MustCompile(
-			filepath.ToSlash(filepath.Join(os.TempDir(), "hyperv") + `[[:digit:]]{9}$`))
-		match := expectedBuildDirRe.MatchString(stateBuildDir)
-		if !match {
-			t.Fatalf("Got path that doesn't match expected format in 'build_dir': %s", stateBuildDir)
-		}
+	}
+
+	stateBuildDir := v.(string)
+	if !strings.HasPrefix(os.TempDir(), step.TempPath) {
+		t.Fatalf("buildDir should be stored in step.TempPath")
+	}
+
+	randomSuffix := stateBuildDir[len(step.TempPath):]
+
+	match := expectedBuildDirRe.MatchString(randomSuffix)
+	if !match {
+		t.Fatalf("Got suffix %q that doesn't match expected format %q in 'build_dir'", randomSuffix, expectedBuildDirPattern)
 	}
 
 	// Test Cleanup
@@ -72,18 +80,21 @@ func TestStepCreateBuildDir_UserDefinedTempPath(t *testing.T) {
 		t.Fatal("Should NOT have error")
 	}
 
-	if v, ok := state.GetOk("build_dir"); !ok {
+	v, ok := state.GetOk("build_dir")
+	if !ok {
 		t.Fatal("Should store path to build directory in statebag as 'build_dir'")
-	} else {
-		// On windows convert everything to forward slash separated paths
-		// This prevents the regexp interpreting backslashes as escape sequences
-		stateBuildDir := filepath.ToSlash(v.(string))
-		expectedBuildDirRe := regexp.MustCompile(
-			filepath.ToSlash(filepath.Join(step.TempPath, "hyperv") + `[[:digit:]]{9}$`))
-		match := expectedBuildDirRe.MatchString(stateBuildDir)
-		if !match {
-			t.Fatalf("Got path that doesn't match expected format in 'build_dir': %s", stateBuildDir)
-		}
+	}
+
+	stateBuildDir := v.(string)
+	if !strings.HasPrefix(stateBuildDir, step.TempPath+string(os.PathSeparator)) {
+		t.Fatalf("buildDir should be stored in step.TempPath")
+	}
+
+	randomSuffix := stateBuildDir[len(step.TempPath)+1:]
+
+	match := expectedBuildDirRe.MatchString(randomSuffix)
+	if !match {
+		t.Fatalf("Got suffix %q that doesn't match expected format %q in 'build_dir'", randomSuffix, expectedBuildDirPattern)
 	}
 
 	// Test Cleanup
