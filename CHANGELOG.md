@@ -1,3 +1,5 @@
+See [Releases](https://github.com/hashicorp/packer-plugin-hyperv/releases) for latest CHANGELOG information.
+
 ## 1.0.0 (June 14, 2021)
 * Update packer-plugin-sdk to version 0.2.3. [GH-29]
 * Add disable_shutdown option to Hyper-V builders. [GH-23]
