@@ -36,9 +36,7 @@ $HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchN
 if ($HostVMAdapter){
   $HostNetAdapter = Get-NetAdapter | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
   if ($HostNetAdapter){
-    $HostNetAdapterIfIndex = @()
-    $HostNetAdapterIfIndex += $HostNetAdapter.ifIndex
-    $HostNetAdapterConfiguration = @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex)}
+    $HostNetAdapterConfiguration = @(Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $HostNetAdapter.InterfaceIndex | Where-Object SuffixOrigin -notmatch "Link")
     if ($HostNetAdapterConfiguration){
       return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
     }
