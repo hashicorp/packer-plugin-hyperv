@@ -235,6 +235,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			EnableTPM:                      b.config.EnableTPM,
 			UseLegacyNetworkAdapter:        b.config.UseLegacyNetworkAdapter,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
