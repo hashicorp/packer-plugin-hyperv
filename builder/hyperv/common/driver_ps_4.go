@@ -13,22 +13,21 @@ import (
 
 	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/powershell/hyperv"
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/wsl"
 )
 
 type HypervPS4Driver struct {
 }
 
 func NewHypervPS4Driver() (Driver, error) {
-	appliesTo := "Applies to Windows 8.1, Windows PowerShell 4.0, Windows Server 2012 R2 only"
+	appliesTo := "Applies to Windows 8.1+, Windows PowerShell 4.0, Windows Server 2012 R2+, WSL2 only"
 
-	// Check this is Windows
-	if runtime.GOOS != "windows" {
+	if !wsl.IsWSL() && runtime.GOOS != "windows" {
 		err := fmt.Errorf("%s", appliesTo)
 		return nil, err
 	}
 
 	ps4Driver := &HypervPS4Driver{}
-
 	if err := ps4Driver.Verify(); err != nil {
 		return nil, err
 	}
