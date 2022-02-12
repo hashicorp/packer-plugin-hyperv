@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/wsl"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -33,6 +34,16 @@ func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) m
 	} else {
 		log.Println("No dvd disk, not attaching.")
 		return multistep.ActionContinue
+	}
+
+	if wsl.IsWSL() {
+		var err error
+		isoPath, err = wsl.ConvertWSlPathToWindowsPath(isoPath)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Determine if its a virtual hdd to mount
