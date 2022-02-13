@@ -146,6 +146,9 @@ func saveScript(fileContents string) (string, error) {
 			return "", err
 		}
 		file, err = ioutil.TempFile(wslTempDir, "powershell")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	if err != nil {
