@@ -338,34 +338,3 @@ return $generation
 
 	return generation, err
 }
-
-func SetUnattendedProductKey(path string, productKey string) error {
-
-	var script = `
-param([string]$path,[string]$productKey)
-
-$unattend = [xml](Get-Content -Path $path)
-$ns = @{ un = 'urn:schemas-microsoft-com:unattend' }
-
-$setupNode = $unattend |
-  Select-Xml -XPath '//un:settings[@pass = "specialize"]/un:component[@name = "Microsoft-Windows-Shell-Setup"]' -Namespace $ns |
-  Select-Object -ExpandProperty Node
-
-$productKeyNode = $setupNode |
-  Select-Xml -XPath '//un:ProductKey' -Namespace $ns |
-  Select-Object -ExpandProperty Node
-
-if ($productKeyNode -eq $null) {
-    $productKeyNode = $unattend.CreateElement('ProductKey', $ns.un)
-    [Void]$setupNode.AppendChild($productKeyNode)
-}
-
-$productKeyNode.InnerText = $productKey
-
-$unattend.Save($path)
-`
-
-	var ps PowerShellCmd
-	err := ps.Run(script, path, productKey)
-	return err
-}
