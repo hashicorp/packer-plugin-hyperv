@@ -1298,9 +1298,9 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
 
-	function Hyper-V\Get-VMConsole
+	function Hyper-V\Get-VMKeyboard
 	{
-	    [CmdletBinding()]
+	    [OutputType([CimInstance])]
 	    param (
 	        [Parameter(Mandatory)]
 	        [string] $VMName
@@ -1327,106 +1327,10 @@ param([string]$vmName, [string]$scanCodes)
 	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
 	    }
 
-	    #TODO: It may be better using New-Module -AsCustomObject to return console object?
-
-	    #Console object to return
-	    $console = [pscustomobject] @{
-	        Msvm_ComputerSystem = $vm
-	        Msvm_Keyboard = $vmKeyboard
-	    }
-
-	    #Need to import assembly to use System.Windows.Input.Key
-	    Add-Type -AssemblyName WindowsBase
-
-	    #region Add Console Members
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeText -Value {
-	        [OutputType([bool])]
-	        param (
-	            [ValidateNotNullOrEmpty()]
-	            [Parameter(Mandatory)]
-	            [string] $AsciiText
-	        )
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeText" -Arguments @{ asciiText = $AsciiText }
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:TypeCtrlAltDel
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeCtrlAltDel -Value {
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeCtrlAltDel"
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:TypeKey
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeKey -Value {
-	        [OutputType([bool])]
-	        param (
-	            [Parameter(Mandatory)]
-	            [Windows.Input.Key] $Key,
-	            [Windows.Input.ModifierKeys] $ModifierKey = [Windows.Input.ModifierKeys]::None
-	        )
-
-	        $keyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey($Key)
-
-	        switch ($ModifierKey)
-	        {
-	            ([Windows.Input.ModifierKeys]::Control){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftCtrl)}
-	            ([Windows.Input.ModifierKeys]::Alt){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftAlt)}
-	            ([Windows.Input.ModifierKeys]::Shift){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftShift)}
-	            ([Windows.Input.ModifierKeys]::Windows){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LWin)}
-	        }
-
-	        if ($ModifierKey -eq [Windows.Input.ModifierKeys]::None)
-	        {
-	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
-	        }
-	        else
-	        {
-	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "PressKey" -Arguments @{ keyCode = $modifierKeyCode }
-	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
-	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "ReleaseKey" -Arguments @{ keyCode = $modifierKeyCode }
-	        }
-	        $result = return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:Scancodes
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeScancodes -Value {
-	        [OutputType([bool])]
-	        param (
-	            [Parameter(Mandatory)]
-	            [byte[]] $ScanCodes
-	        )
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $ScanCodes }
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:ExecCommand
-	    $console | Add-Member -MemberType ScriptMethod -Name ExecCommand -Value {
-	        param (
-	            [Parameter(Mandatory)]
-	            [string] $Command
-	        )
-	        if ([String]::IsNullOrEmpty($Command)){
-	            return
-	        }
-
-	        $console.TypeText($Command) > $null
-	        $console.TypeKey([Windows.Input.Key]::Enter) > $null
-	        #sleep -Milliseconds 100
-	    }
-
-	    #Define method:Dispose
-	    $console | Add-Member -MemberType ScriptMethod -Name Dispose -Value {
-	        $this.Msvm_ComputerSystem.Dispose()
-	        $this.Msvm_Keyboard.Dispose()
-	    }
-
-
-	    #endregion
-
-	    return $console
+	    return $vmKeyboard
 	}
 
-	$vmConsole = Hyper-V\Get-VMConsole -VMName $vmName
+	$vmKeyboard = Hyper-V\Get-VMKeyboard -VMName $vmName
 	$scanCodesToSend = ''
 	$scanCodes.Split(' ') | %{
 		$scanCode = $_
@@ -1440,9 +1344,7 @@ param([string]$vmName, [string]$scanCodes)
 			if ($scanCodesToSend){
 				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
 
-                $scanCodesToSendByteArray | %{
-				    $vmConsole.TypeScancodes($_)
-                }
+				$vmKeyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $scanCodesToSendByteArray }
 			}
 
 			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
@@ -1462,9 +1364,7 @@ param([string]$vmName, [string]$scanCodes)
 	if ($scanCodesToSend){
 		$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
 
-        $scanCodesToSendByteArray | %{
-			$vmConsole.TypeScancodes($_)
-        }
+        $vmKeyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $scanCodesToSendByteArray }
 	}
 `
 
