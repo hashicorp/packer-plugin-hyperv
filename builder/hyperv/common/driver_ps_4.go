@@ -345,11 +345,7 @@ func (d *HypervPS4Driver) isCurrentUserAHyperVAdministrator() (bool, error) {
 	//SID:S-1-5-32-578 = 'BUILTIN\Hyper-V Administrators'
 	//https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
 
-	var script = `
-$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-$principal = new-object System.Security.Principal.WindowsPrincipal($identity)
-$hypervrole = [System.Security.Principal.SecurityIdentifier]"S-1-5-32-578"
-return $principal.IsInRole($hypervrole)
+	var script = `$x = (Get-LocalGroupMember -SID "S-1-5-32-544" | where Name -eq $(Get-WMIObject -class Win32_ComputerSystem | select username).username); if ($x){ Write-Output "True"}
 `
 
 	var ps powershell.PowerShellCmd

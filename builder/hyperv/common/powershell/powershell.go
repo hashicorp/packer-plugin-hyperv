@@ -201,11 +201,7 @@ try {
 }
 
 func IsCurrentUserAnAdministrator() (bool, error) {
-	var script = `
-$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-$principal = new-object System.Security.Principal.WindowsPrincipal($identity)
-$administratorRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
-return $principal.IsInRole($administratorRole)
+	var script = `$x = (Get-LocalGroupMember -SID "S-1-5-32-544" | where Name -eq $(Get-WMIObject -class Win32_ComputerSystem | select username).username); if ($x){ Write-Output "True"}
 `
 
 	var ps PowerShellCmd

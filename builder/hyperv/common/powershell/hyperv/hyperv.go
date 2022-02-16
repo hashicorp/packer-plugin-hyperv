@@ -758,11 +758,11 @@ param([string]$srcPath, [string]$dstPath)
 $srcPath, $dstPath | % {
     if ($_) {
         if (! (Test-Path $_)) {
-            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            Write-Error -Message "Path $_ does not exist." -Category ObjectNotFound
             exit
         }
     } else {
-        [System.Console]::Error.WriteLine("A supplied path is empty")
+        Write-Error -Message "A supplied path is empty" -Category ObjectNotFound
         exit
     }
 }
@@ -775,7 +775,7 @@ Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination (Get
 $dirObj = Get-ChildItem $srcPath -Directory | % {
     New-Object PSObject -Property @{
         FullName=$_.FullName;
-        HasContent=$(if ($_.GetFileSystemInfos().Count -gt 0) {$true} else {$false})
+        HasContent=$(if (Get-ChildItem $_.FullName | measure | %{$_.Count -gt 0}) {$true} else {$false})
     }
 }
 foreach ($directory in $dirObj) {
@@ -787,14 +787,14 @@ foreach ($directory in $dirObj) {
 }
 
 # Only remove the source directory if it is now empty
-if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
+if (Get-ChildItem $srcPath | measure | %{$_.Count -eq 0}) {
     Remove-Item -Path $srcPath
 } else {
     # 'Return' an error message to PowerShellCmd as the directory should
     # always be empty at the end of the script. The check is here to stop
     # the Remove-Item command from doing any damage if some unforeseen
     # error has occured
-    [System.Console]::Error.WriteLine("Refusing to remove $srcPath as it is not empty")
+    Write-Error -Message "Refusing to remove $srcPath as it is not empty." -Category ResourceExists
     exit
 }
 `
@@ -815,11 +815,11 @@ param([string]$srcPath, [string]$dstPath)
 $srcPath, $dstPath | % {
     if ($_) {
         if (! (Test-Path $_)) {
-            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            Write-Error -Message "Path $_ does not exist." -Category ObjectNotFound
             exit
         }
     } else {
-        [System.Console]::Error.WriteLine("A supplied path is empty")
+        Write-Error -Message "A supplied path is empty." -Category ObjectNotFound
         exit
     }
 }
@@ -831,7 +831,7 @@ $dstPathAbs = (Get-Item($dstPath)).FullName
 # Get the full path to all disks under the directory or exit if none are found
 $disks = Get-ChildItem -Path $srcPathAbs -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
 if ($disks.Length -eq 0) {
-    [System.Console]::Error.WriteLine("No disks found under $srcPathAbs")
+    Write-Error -Message "No disks found under $srcPathAbs." -Category ObjectNotFound
     exit
 }
 
@@ -876,7 +876,7 @@ foreach ($disk in $disks) {
     if ($sizeAfter -gt 0) { # Protect against division by zero
         $percentChange = ( ( $sizeAfter / $sizeBefore ) * 100 ) - 100
         switch($percentChange) {
-            {$_ -lt 0} {Write-Output "Disk size reduced by: $(([math]::Abs($_)).ToString("#.#"))%"}
+            {$_ -lt 0} {Write-Output "Disk size reduced by: $((-$_).ToString("#.#"))%"}
             {$_ -eq 0} {Write-Output "Disk size is unchanged"}
             {$_ -gt 0} {Write-Output "WARNING: Disk size increased by: $($_.ToString("#.#"))%"}
         }
