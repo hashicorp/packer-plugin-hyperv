@@ -155,6 +155,11 @@ type DriverMock struct {
 	CloneVirtualMachine_Copy                  bool
 	CloneVirtualMachine_Err                   error
 
+	ResizeVirtualMachineVhd_Called         bool
+	ResizeVirtualMachineVhd_VmName         string
+	ResizeVirtualMachineVhd_newSizeInBytes uint64
+	ResizeVirtualMachineVhd_Err            error
+
 	DeleteVirtualMachine_Called bool
 	DeleteVirtualMachine_VmName string
 	DeleteVirtualMachine_Err    error
@@ -475,6 +480,14 @@ func (d *DriverMock) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmNa
 	d.CloneVirtualMachine_Copy = copyTF
 
 	return d.CloneVirtualMachine_Err
+}
+
+func (d *DriverMock) ResizeVirtualMachineVhd(vmName string, newSizeInBytes uint64) error {
+	d.ResizeVirtualMachineVhd_Called = true
+	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
+	d.ResizeVirtualMachineVhd_newSizeInBytes = newSizeInBytes
+
+	return d.ResizeVirtualMachineVhd_Err
 }
 
 func (d *DriverMock) DeleteVirtualMachine(vmName string) error {

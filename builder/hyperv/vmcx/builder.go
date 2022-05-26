@@ -59,6 +59,9 @@ type Config struct {
 	// Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
 	// The timeout can be changed using the `shutdown_timeout` option.
 	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
+	// The size, in megabytes, of the primary hard disk
+	// for the VM. By default, this is the same as the cloned VM.
+	DiskSize *uint `mapstructure:"disk_size" required:"false"`
 	// This is the path to a directory containing an exported virtual machine.
 	CloneFromVMCXPath string `mapstructure:"clone_from_vmcx_path"`
 	// This is the name of the virtual machine to clone from.
@@ -279,6 +282,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			KeepRegistered:                 b.config.KeepRegistered,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DiskBlockSize:                  b.config.DiskBlockSize,
+		},
+
+		&hypervcommon.StepResizeVhd{
+			DiskSize: b.config.DiskSize,
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},
