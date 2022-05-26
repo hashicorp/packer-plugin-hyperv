@@ -7,6 +7,9 @@
   Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
   The timeout can be changed using the `shutdown_timeout` option.
 
+- `disk_size` (\*uint) - The size, in megabytes, of the primary hard disk
+  for the VM. By default, this is the same as the cloned VM.
+
 - `clone_from_vmcx_path` (string) - This is the path to a directory containing an exported virtual machine.
 
 - `clone_from_vm_name` (string) - This is the name of the virtual machine to clone from.
