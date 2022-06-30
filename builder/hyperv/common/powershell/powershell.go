@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/common/wsl"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
@@ -53,6 +55,12 @@ func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, 
 
 	if !debug {
 		defer os.Remove(filename)
+	}
+	if wsl.IsWSL() {
+		filename, err = wsl.ConvertWSlPathToWindowsPath(filename)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	args := createArgs(filename, params...)
@@ -102,7 +110,7 @@ func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, 
 }
 
 func IsPowershellAvailable() (bool, string, error) {
-	path, err := exec.LookPath("powershell")
+	path, err := exec.LookPath("powershell.exe")
 	if err != nil {
 		return false, "", err
 	} else {
@@ -124,7 +132,25 @@ func (ps *PowerShellCmd) getPowerShellPath() (string, error) {
 }
 
 func saveScript(fileContents string) (string, error) {
-	file, err := tmp.File("powershell")
+
+	file, err := tmp.File("Powershell")
+	// If under WSL2 then we need a file on the windows drive
+	if wsl.IsWSL() {
+		tmpDir, err := wsl.GetWSlTemp()
+		if err != nil {
+			return "", err
+		}
+
+		wslTempDir, err := wsl.ConvertWindowsPathToWSlPath(tmpDir)
+		if err != nil {
+			return "", err
+		}
+		file, err = ioutil.TempFile(wslTempDir, "powershell")
+		if err != nil {
+			return "", err
+		}
+	}
+
 	if err != nil {
 		return "", err
 	}
