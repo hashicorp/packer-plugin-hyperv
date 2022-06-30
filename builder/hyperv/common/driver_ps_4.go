@@ -204,6 +204,10 @@ func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmcxPath string, cloneFro
 		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName, copyTF)
 }
 
+func (d *HypervPS4Driver) ResizeVirtualMachineVhd(vmName string, newSizeInBytes uint64) error {
+	return hyperv.ResizeVirtualMachineVhd(vmName, newSizeInBytes)
+}
+
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
 	return hyperv.DeleteVirtualMachine(vmName)
 }

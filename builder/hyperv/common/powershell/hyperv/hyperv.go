@@ -605,6 +605,26 @@ func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	return DeleteAllDvdDrives(vmName)
 }
 
+func ResizeVirtualMachineVhd(vmName string, newSizeInBytes uint64) error {
+
+	var script = `
+param([string]$vmName, [uint64]$newSizeInBytes)
+
+$firstVhdPath = Hyper-V\Get-Vm -Name $vmName | Hyper-V\Get-VMHardDiskDrive | Sort-Object ControllerNumber,ControllerLocation | Select-Object -First 1 -ExpandProperty Path
+
+if (-not $firstVhdPath) {
+	throw 'Unable to resize hard disk drive on virtual machine. No hard disk drive was found.'
+}
+
+Hyper-V\Get-VHD -Path $firstVhdPath | Hyper-V\Resize-VHD -SizeBytes "$newSizeInBytes"
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, strconv.FormatUint(newSizeInBytes, 10))
+
+	return err
+}
+
 func GetVirtualMachineGeneration(vmName string) (uint, error) {
 	var script = `
 param([string]$vmName)

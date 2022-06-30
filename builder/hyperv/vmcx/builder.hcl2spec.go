@@ -118,6 +118,7 @@ type FlatConfig struct {
 	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command" hcl:"shutdown_command"`
 	ShutdownTimeout                *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
 	DisableShutdown                *bool             `mapstructure:"disable_shutdown" required:"false" cty:"disable_shutdown" hcl:"disable_shutdown"`
+	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	CloneFromVMCXPath              *string           `mapstructure:"clone_from_vmcx_path" cty:"clone_from_vmcx_path" hcl:"clone_from_vmcx_path"`
 	CloneFromVMName                *string           `mapstructure:"clone_from_vm_name" cty:"clone_from_vm_name" hcl:"clone_from_vm_name"`
 	CloneFromSnapshotName          *string           `mapstructure:"clone_from_snapshot_name" required:"false" cty:"clone_from_snapshot_name" hcl:"clone_from_snapshot_name"`
@@ -246,6 +247,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"disable_shutdown":                 &hcldec.AttrSpec{Name: "disable_shutdown", Type: cty.Bool, Required: false},
+		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"clone_from_vmcx_path":             &hcldec.AttrSpec{Name: "clone_from_vmcx_path", Type: cty.String, Required: false},
 		"clone_from_vm_name":               &hcldec.AttrSpec{Name: "clone_from_vm_name", Type: cty.String, Required: false},
 		"clone_from_snapshot_name":         &hcldec.AttrSpec{Name: "clone_from_snapshot_name", Type: cty.String, Required: false},

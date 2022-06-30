@@ -81,6 +81,8 @@ type Driver interface {
 
 	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
 
+	ResizeVirtualMachineVhd(string, uint64) error
+
 	DeleteVirtualMachine(string) error
 
 	GetVirtualMachineGeneration(string) (uint, error)
