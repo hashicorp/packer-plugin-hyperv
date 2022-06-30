@@ -118,6 +118,9 @@ type CommonConfig struct {
 	// disable dynamic memory and have at least 4GB of RAM assigned to the
 	// virtual machine.
 	EnableVirtualizationExtensions bool `mapstructure:"enable_virtualization_extensions" required:"false"`
+	// If true enable a virtual TPM for the
+	// virtual machine. This defaults to false.
+	EnableTPM bool `mapstructure:"enable_tpm" required:"false"`
 	// The location under which Packer will create a directory to house all the
 	// VM files and folders during the build. By default `%TEMP%` is used
 	// which, for most systems, will evaluate to

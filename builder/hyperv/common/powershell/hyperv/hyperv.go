@@ -719,6 +719,25 @@ if ($cmdlet.Parameters.SecureBootTemplate) {
 	return err
 }
 
+func SetVirtualMachineTPM(vmName string, enableTPM bool) error {
+	var script = `
+param([string]$vmName)
+Hyper-V\Disable-VMTPM -VMName $vmName
+`
+	if enableTPM {
+		script = `
+param([string]$vmName)
+Hyper-V\Set-VMKeyProtector -VMName $vmName -NewLocalKeyProtector
+Hyper-V\Enable-VMTPM -VMName $vmName
+`
+	}
+
+	var ps powershell.PowerShellCmd
+
+	err := ps.Run(script, vmName)
+	return err
+}
+
 func DeleteVirtualMachine(vmName string) error {
 
 	var script = `
@@ -774,6 +793,7 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
   </boot>
   <secure_boot_enabled type="bool">False</secure_boot_enabled>
   <secure_boot_template type="string">MicrosoftWindows</secure_boot_template>
+  <tpm_enabled type="bool">False</tpm_enabled>
   <notes type="string">$($vm.Notes)</notes>
   <vm-controllers/>
 </configuration>
@@ -799,6 +819,10 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
     else
     {
       $config.configuration.secure_boot_enabled.'#text' = 'False'
+	}
+    if ((Hyper-V\Get-VMSecurity -VM $vm).TpmEnabled -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
+    {
+	  $config.configuration.tpm_enabled.'#text' = 'True'
 	}
   }
 

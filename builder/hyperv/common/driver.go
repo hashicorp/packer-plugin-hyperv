@@ -95,6 +95,8 @@ type Driver interface {
 
 	SetVirtualMachineVirtualizationExtensions(string, bool) error
 
+	SetVirtualMachineTPM(string, bool) error
+
 	EnableVirtualMachineIntegrationService(string, string) error
 
 	ExportVirtualMachine(string, string) error

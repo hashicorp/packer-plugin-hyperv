@@ -107,6 +107,7 @@ type FlatConfig struct {
 	EnableSecureBoot               *bool             `mapstructure:"enable_secure_boot" required:"false" cty:"enable_secure_boot" hcl:"enable_secure_boot"`
 	SecureBootTemplate             *string           `mapstructure:"secure_boot_template" required:"false" cty:"secure_boot_template" hcl:"secure_boot_template"`
 	EnableVirtualizationExtensions *bool             `mapstructure:"enable_virtualization_extensions" required:"false" cty:"enable_virtualization_extensions" hcl:"enable_virtualization_extensions"`
+	EnableTPM                      *bool             `mapstructure:"enable_tpm" required:"false" cty:"enable_tpm" hcl:"enable_tpm"`
 	TempPath                       *string           `mapstructure:"temp_path" required:"false" cty:"temp_path" hcl:"temp_path"`
 	Version                        *string           `mapstructure:"configuration_version" required:"false" cty:"configuration_version" hcl:"configuration_version"`
 	KeepRegistered                 *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered" hcl:"keep_registered"`
@@ -235,6 +236,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"enable_secure_boot":               &hcldec.AttrSpec{Name: "enable_secure_boot", Type: cty.Bool, Required: false},
 		"secure_boot_template":             &hcldec.AttrSpec{Name: "secure_boot_template", Type: cty.String, Required: false},
 		"enable_virtualization_extensions": &hcldec.AttrSpec{Name: "enable_virtualization_extensions", Type: cty.Bool, Required: false},
+		"enable_tpm":                       &hcldec.AttrSpec{Name: "enable_tpm", Type: cty.Bool, Required: false},
 		"temp_path":                        &hcldec.AttrSpec{Name: "temp_path", Type: cty.String, Required: false},
 		"configuration_version":            &hcldec.AttrSpec{Name: "configuration_version", Type: cty.String, Required: false},
 		"keep_registered":                  &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},

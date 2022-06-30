@@ -228,6 +228,10 @@ func (d *HypervPS4Driver) SetVirtualMachineVirtualizationExtensions(vmName strin
 	return hyperv.SetVirtualMachineVirtualizationExtensions(vmName, enable)
 }
 
+func (d *HypervPS4Driver) SetVirtualMachineTPM(vmName string, enable bool) error {
+	return hyperv.SetVirtualMachineTPM(vmName, enable)
+}
+
 func (d *HypervPS4Driver) EnableVirtualMachineIntegrationService(vmName string,
 	integrationServiceName string) error {
 	return hyperv.EnableVirtualMachineIntegrationService(vmName, integrationServiceName)
