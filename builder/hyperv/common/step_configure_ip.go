@@ -43,7 +43,7 @@ func (s *StepConfigureIp) Run(ctx context.Context, state multistep.StateBag) mul
 			break
 		}
 
-		log.Println(fmt.Sprintf("Waiting for another %v minutes...", uint(duration)))
+		log.Printf("Waiting for another %v minutes...", uint(duration))
 		time.Sleep(sleepTime)
 		count--
 	}

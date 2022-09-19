@@ -186,12 +186,12 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 
 	if c.VMName == "" {
 		c.VMName = fmt.Sprintf("packer-%s", pc.PackerBuildName)
-		log.Println(fmt.Sprintf("%s: %v", "VMName", c.VMName))
+		log.Printf("%s: %v", "VMName", c.VMName)
 	}
 
 	if c.SwitchName == "" {
 		c.SwitchName = c.detectSwitchName(pc.PackerBuildName)
-		log.Println(fmt.Sprintf("Using switch %s", c.SwitchName))
+		log.Printf("Using switch %s", c.SwitchName)
 	}
 
 	if c.Generation < 1 || c.Generation > 2 {
@@ -360,7 +360,7 @@ func (c *CommonConfig) checkDiskBlockSize() error {
 		c.DiskBlockSize = DefaultDiskBlockSize
 	}
 
-	log.Println(fmt.Sprintf("%s: %v", "DiskBlockSize", c.DiskBlockSize))
+	log.Printf("%s: %v", "DiskBlockSize", c.DiskBlockSize)
 
 	if c.DiskBlockSize < MinDiskBlockSize {
 		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size >= %v MB, but defined: %v",
@@ -380,7 +380,7 @@ func (c *CommonConfig) checkHostAvailableMemory() string {
 		freeMB := powershell.GetHostAvailableMemory()
 
 		if (freeMB - float64(c.RamSize)) < LowRam {
-			return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system.")
+			return "Hyper-V might fail to create a VM if there is not enough free memory in the system."
 		}
 	}
 
@@ -392,7 +392,7 @@ func (c *CommonConfig) checkRamSize() error {
 		c.RamSize = DefaultRamSize
 	}
 
-	log.Println(fmt.Sprintf("%s: %v", "RamSize", c.RamSize))
+	log.Printf("%s: %v", "RamSize", c.RamSize)
 
 	if c.RamSize < MinRamSize {
 		return fmt.Errorf("memory: Virtual machine requires memory size >= %v MB, but defined: %v",

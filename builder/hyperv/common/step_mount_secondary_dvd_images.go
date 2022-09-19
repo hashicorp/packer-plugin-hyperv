@@ -68,8 +68,8 @@ func (s *StepMountSecondaryDvdImages) Run(ctx context.Context, state multistep.S
 			return multistep.ActionHalt
 		}
 
-		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber,
-			controllerLocation))
+		log.Printf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber,
+			controllerLocation)
 	}
 
 	return multistep.ActionContinue
@@ -95,12 +95,12 @@ func (s *StepMountSecondaryDvdImages) Cleanup(state multistep.StateBag) {
 		if dvdController.Existing {
 			err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 			if err != nil {
-				log.Print(fmt.Sprintf(errorMsg, err))
+				log.Printf(errorMsg, err)
 			}
 		} else {
 			err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 			if err != nil {
-				log.Print(fmt.Sprintf(errorMsg, err))
+				log.Printf(errorMsg, err)
 			}
 		}
 	}

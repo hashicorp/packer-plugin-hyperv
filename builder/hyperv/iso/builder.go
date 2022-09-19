@@ -369,7 +369,7 @@ func (b *Builder) checkDiskSize() error {
 		b.config.DiskSize = DefaultDiskSize
 	}
 
-	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
+	log.Printf("%s: %v", "DiskSize", b.config.DiskSize)
 
 	if b.config.DiskSize < MinDiskSize {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v",

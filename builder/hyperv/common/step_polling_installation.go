@@ -39,7 +39,7 @@ func (s *StepPollingInstallation) Run(ctx context.Context, state multistep.State
 	var res string
 
 	for count > 0 {
-		log.Println(fmt.Sprintf("Connecting vm (%s)...", host))
+		log.Printf("Connecting vm (%s)...", host)
 		cmd := exec.Command("powershell", blockBuffer.String())
 		cmdOut, err := cmd.Output()
 		if err != nil {
@@ -58,7 +58,7 @@ func (s *StepPollingInstallation) Run(ctx context.Context, state multistep.State
 			break
 		}
 
-		log.Println(fmt.Sprintf("Slipping for more %v seconds...", uint(duration)))
+		log.Printf("Slipping for more %v seconds...", uint(duration))
 		time.Sleep(sleepTime)
 		count--
 	}
