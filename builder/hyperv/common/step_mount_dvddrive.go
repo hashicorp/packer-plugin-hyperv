@@ -109,13 +109,13 @@ func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 		err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error unmounting dvd drive: %s", err)
-			log.Print(fmt.Sprintf(errorMsg, err))
+			log.Printf(errorMsg, err)
 		}
 	} else {
 		err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error deleting dvd drive: %s", err)
-			log.Print(fmt.Sprintf(errorMsg, err))
+			log.Printf(errorMsg, err)
 		}
 	}
 }

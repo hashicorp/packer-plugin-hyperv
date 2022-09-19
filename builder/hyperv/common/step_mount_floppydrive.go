@@ -82,13 +82,13 @@ func (s *StepMountFloppydrive) Cleanup(state multistep.StateBag) {
 
 	err := driver.UnmountFloppyDrive(vmName)
 	if err != nil {
-		log.Print(fmt.Sprintf(errorMsg, err))
+		log.Printf(errorMsg, err)
 	}
 
 	err = os.Remove(s.floppyPath)
 
 	if err != nil {
-		log.Print(fmt.Sprintf(errorMsg, err))
+		log.Printf(errorMsg, err)
 	}
 }
 

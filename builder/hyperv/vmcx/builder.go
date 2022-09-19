@@ -168,8 +168,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 						"clone is running: %s", err))
 				} else {
 					if virtualMachineOn {
-						warning := fmt.Sprintf("Cloning from a virtual machine that is running.")
-						warnings = hypervcommon.Appendwarns(warnings, warning)
+						warnings = hypervcommon.Appendwarns(warnings, "Cloning from a virtual machine that is running.")
 					}
 				}
 			}
