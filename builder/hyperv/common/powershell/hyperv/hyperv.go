@@ -742,100 +742,6 @@ func ExportVirtualMachine(vmName string, path string) error {
 	var script = `
 param([string]$vmName, [string]$path)
 Hyper-V\Export-VM -Name $vmName -Path $path
-
-if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.VMCX')))
-{
-  $vm = Hyper-V\Get-VM -Name $vmName
-  $vm_adapter = Hyper-V\Get-VMNetworkAdapter -VM $vm | Select -First 1
-
-  $config = [xml]@"
-<?xml version="1.0" ?>
-<configuration>
-  <properties>
-    <subtype type="integer">$($vm.Generation - 1)</subtype>
-    <name type="string">$($vm.Name)</name>
-  </properties>
-  <settings>
-    <processors>
-      <count type="integer">$($vm.ProcessorCount)</count>
-    </processors>
-    <memory>
-      <bank>
-        <dynamic_memory_enabled type="bool">$($vm.DynamicMemoryEnabled)</dynamic_memory_enabled>
-        <limit type="integer">$($vm.MemoryMaximum / 1MB)</limit>
-        <reservation type="integer">$($vm.MemoryMinimum / 1MB)</reservation>
-        <size type="integer">$($vm.MemoryStartup / 1MB)</size>
-      </bank>
-    </memory>
-  </settings>
-  <AltSwitchName type="string">$($vm_adapter.SwitchName)</AltSwitchName>
-  <boot>
-    <device0 type="string">Optical</device0>
-  </boot>
-  <secure_boot_enabled type="bool">False</secure_boot_enabled>
-  <secure_boot_template type="string">MicrosoftWindows</secure_boot_template>
-  <notes type="string">$($vm.Notes)</notes>
-  <vm-controllers/>
-</configuration>
-"@
-
-  if ($vm.Generation -eq 1)
-  {
-    $vm_controllers  = Hyper-V\Get-VMIdeController -VM $vm
-    $controller_type = $config.SelectSingleNode('/configuration/vm-controllers')
-    # IDE controllers are not stored in a special XML container
-  }
-  else
-  {
-    $vm_controllers  = Hyper-V\Get-VMScsiController -VM $vm
-    $controller_type = $config.CreateElement('scsi')
-    $controller_type.SetAttribute('ChannelInstanceGuid', 'x')
-    # SCSI controllers are stored in the scsi XML container
-    if ((Hyper-V\Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
-    {
-	  $config.configuration.secure_boot_enabled.'#text' = 'True'
-	  $config.configuration.secure_boot_template.'#text' = (Hyper-V\Get-VMFirmware -VM $vm).SecureBootTemplate
-	}
-    else
-    {
-      $config.configuration.secure_boot_enabled.'#text' = 'False'
-	}
-  }
-
-  $vm_controllers | ForEach {
-    $controller = $config.CreateElement('controller' + $_.ControllerNumber)
-    $_.Drives | ForEach {
-      $drive = $config.CreateElement('drive' + ($_.DiskNumber + 0))
-      $drive_path = $config.CreateElement('pathname')
-      $drive_path.SetAttribute('type', 'string')
-      $drive_path.AppendChild($config.CreateTextNode($_.Path))
-      $drive_type = $config.CreateElement('type')
-      $drive_type.SetAttribute('type', 'string')
-      if ($_ -is [Microsoft.HyperV.PowerShell.HardDiskDrive])
-      {
-        $drive_type.AppendChild($config.CreateTextNode('VHD'))
-      }
-      elseif ($_ -is [Microsoft.HyperV.PowerShell.DvdDrive])
-      {
-        $drive_type.AppendChild($config.CreateTextNode('ISO'))
-      }
-      else
-      {
-        $drive_type.AppendChild($config.CreateTextNode('NONE'))
-      }
-      $drive.AppendChild($drive_path)
-      $drive.AppendChild($drive_type)
-      $controller.AppendChild($drive)
-    }
-    $controller_type.AppendChild($controller)
-  }
-  if ($controller_type.Name -ne 'vm-controllers')
-  {
-    $config.SelectSingleNode('/configuration/vm-controllers').AppendChild($controller_type)
-  }
-
-  $config.Save([IO.Path]::Combine($path, $vm.Name, 'Virtual Machines', 'box.xml'))
-}
 `
 
 	var ps powershell.PowerShellCmd
@@ -852,11 +758,11 @@ param([string]$srcPath, [string]$dstPath)
 $srcPath, $dstPath | % {
     if ($_) {
         if (! (Test-Path $_)) {
-            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            Write-Error -Message "Path $_ does not exist." -Category ObjectNotFound
             exit
         }
     } else {
-        [System.Console]::Error.WriteLine("A supplied path is empty")
+        Write-Error -Message "A supplied path is empty" -Category ObjectNotFound
         exit
     }
 }
@@ -869,7 +775,7 @@ Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination (Get
 $dirObj = Get-ChildItem $srcPath -Directory | % {
     New-Object PSObject -Property @{
         FullName=$_.FullName;
-        HasContent=$(if ($_.GetFileSystemInfos().Count -gt 0) {$true} else {$false})
+        HasContent=$(if (Get-ChildItem $_.FullName | measure | %{$_.Count -gt 0}) {$true} else {$false})
     }
 }
 foreach ($directory in $dirObj) {
@@ -881,14 +787,14 @@ foreach ($directory in $dirObj) {
 }
 
 # Only remove the source directory if it is now empty
-if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
+if (Get-ChildItem $srcPath | measure | %{$_.Count -eq 0}) {
     Remove-Item -Path $srcPath
 } else {
     # 'Return' an error message to PowerShellCmd as the directory should
     # always be empty at the end of the script. The check is here to stop
     # the Remove-Item command from doing any damage if some unforeseen
     # error has occured
-    [System.Console]::Error.WriteLine("Refusing to remove $srcPath as it is not empty")
+    Write-Error -Message "Refusing to remove $srcPath as it is not empty." -Category ResourceExists
     exit
 }
 `
@@ -909,11 +815,11 @@ param([string]$srcPath, [string]$dstPath)
 $srcPath, $dstPath | % {
     if ($_) {
         if (! (Test-Path $_)) {
-            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            Write-Error -Message "Path $_ does not exist." -Category ObjectNotFound
             exit
         }
     } else {
-        [System.Console]::Error.WriteLine("A supplied path is empty")
+        Write-Error -Message "A supplied path is empty." -Category ObjectNotFound
         exit
     }
 }
@@ -925,7 +831,7 @@ $dstPathAbs = (Get-Item($dstPath)).FullName
 # Get the full path to all disks under the directory or exit if none are found
 $disks = Get-ChildItem -Path $srcPathAbs -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
 if ($disks.Length -eq 0) {
-    [System.Console]::Error.WriteLine("No disks found under $srcPathAbs")
+    Write-Error -Message "No disks found under $srcPathAbs." -Category ObjectNotFound
     exit
 }
 
@@ -970,7 +876,7 @@ foreach ($disk in $disks) {
     if ($sizeAfter -gt 0) { # Protect against division by zero
         $percentChange = ( ( $sizeAfter / $sizeBefore ) * 100 ) - 100
         switch($percentChange) {
-            {$_ -lt 0} {Write-Output "Disk size reduced by: $(([math]::Abs($_)).ToString("#.#"))%"}
+            {$_ -lt 0} {Write-Output "Disk size reduced by: $((-$_).ToString("#.#"))%"}
             {$_ -eq 0} {Write-Output "Disk size is unchanged"}
             {$_ -gt 0} {Write-Output "WARNING: Disk size increased by: $($_.ToString("#.#"))%"}
         }
@@ -1392,9 +1298,9 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
 
-	function Hyper-V\Get-VMConsole
+	function Hyper-V\Get-VMKeyboard
 	{
-	    [CmdletBinding()]
+	    [OutputType([CimInstance])]
 	    param (
 	        [Parameter(Mandatory)]
 	        [string] $VMName
@@ -1421,106 +1327,10 @@ param([string]$vmName, [string]$scanCodes)
 	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
 	    }
 
-	    #TODO: It may be better using New-Module -AsCustomObject to return console object?
-
-	    #Console object to return
-	    $console = [pscustomobject] @{
-	        Msvm_ComputerSystem = $vm
-	        Msvm_Keyboard = $vmKeyboard
-	    }
-
-	    #Need to import assembly to use System.Windows.Input.Key
-	    Add-Type -AssemblyName WindowsBase
-
-	    #region Add Console Members
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeText -Value {
-	        [OutputType([bool])]
-	        param (
-	            [ValidateNotNullOrEmpty()]
-	            [Parameter(Mandatory)]
-	            [string] $AsciiText
-	        )
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeText" -Arguments @{ asciiText = $AsciiText }
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:TypeCtrlAltDel
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeCtrlAltDel -Value {
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeCtrlAltDel"
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:TypeKey
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeKey -Value {
-	        [OutputType([bool])]
-	        param (
-	            [Parameter(Mandatory)]
-	            [Windows.Input.Key] $Key,
-	            [Windows.Input.ModifierKeys] $ModifierKey = [Windows.Input.ModifierKeys]::None
-	        )
-
-	        $keyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey($Key)
-
-	        switch ($ModifierKey)
-	        {
-	            ([Windows.Input.ModifierKeys]::Control){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftCtrl)}
-	            ([Windows.Input.ModifierKeys]::Alt){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftAlt)}
-	            ([Windows.Input.ModifierKeys]::Shift){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftShift)}
-	            ([Windows.Input.ModifierKeys]::Windows){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LWin)}
-	        }
-
-	        if ($ModifierKey -eq [Windows.Input.ModifierKeys]::None)
-	        {
-	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
-	        }
-	        else
-	        {
-	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "PressKey" -Arguments @{ keyCode = $modifierKeyCode }
-	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
-	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "ReleaseKey" -Arguments @{ keyCode = $modifierKeyCode }
-	        }
-	        $result = return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:Scancodes
-	    $console | Add-Member -MemberType ScriptMethod -Name TypeScancodes -Value {
-	        [OutputType([bool])]
-	        param (
-	            [Parameter(Mandatory)]
-	            [byte[]] $ScanCodes
-	        )
-	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $ScanCodes }
-	        return (0 -eq $result.ReturnValue)
-	    }
-
-	    #Define method:ExecCommand
-	    $console | Add-Member -MemberType ScriptMethod -Name ExecCommand -Value {
-	        param (
-	            [Parameter(Mandatory)]
-	            [string] $Command
-	        )
-	        if ([String]::IsNullOrEmpty($Command)){
-	            return
-	        }
-
-	        $console.TypeText($Command) > $null
-	        $console.TypeKey([Windows.Input.Key]::Enter) > $null
-	        #sleep -Milliseconds 100
-	    }
-
-	    #Define method:Dispose
-	    $console | Add-Member -MemberType ScriptMethod -Name Dispose -Value {
-	        $this.Msvm_ComputerSystem.Dispose()
-	        $this.Msvm_Keyboard.Dispose()
-	    }
-
-
-	    #endregion
-
-	    return $console
+	    return $vmKeyboard
 	}
 
-	$vmConsole = Hyper-V\Get-VMConsole -VMName $vmName
+	$vmKeyboard = Hyper-V\Get-VMKeyboard -VMName $vmName
 	$scanCodesToSend = ''
 	$scanCodes.Split(' ') | %{
 		$scanCode = $_
@@ -1534,9 +1344,7 @@ param([string]$vmName, [string]$scanCodes)
 			if ($scanCodesToSend){
 				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
 
-                $scanCodesToSendByteArray | %{
-				    $vmConsole.TypeScancodes($_)
-                }
+				$vmKeyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $scanCodesToSendByteArray }
 			}
 
 			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
@@ -1556,9 +1364,7 @@ param([string]$vmName, [string]$scanCodes)
 	if ($scanCodesToSend){
 		$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
 
-        $scanCodesToSendByteArray | %{
-			$vmConsole.TypeScancodes($_)
-        }
+        $vmKeyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $scanCodesToSendByteArray }
 	}
 `
 
