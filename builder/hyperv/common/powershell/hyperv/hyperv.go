@@ -34,7 +34,7 @@ func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 param([string]$switchName, [int]$addressIndex)
 $HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName | Select-Object -First 1
 if ($HostVMAdapter){
-  $HostNetAdapter = Get-NetAdapter | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
+  $HostNetAdapter = Get-NetAdapter -IncludeHidden | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
   if ($HostNetAdapter){
     $HostNetAdapterConfiguration = @(Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $HostNetAdapter.InterfaceIndex | Where-Object SuffixOrigin -notmatch "Link")
     if ($HostNetAdapterConfiguration){
