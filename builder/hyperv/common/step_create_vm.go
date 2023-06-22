@@ -33,6 +33,7 @@ type StepCreateVM struct {
 	EnableSecureBoot               bool
 	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
+	EnableTPM                      bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
 	MacAddress                     string
@@ -129,6 +130,15 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+		if s.EnableTPM {
+			err = driver.SetVirtualMachineTPM(s.VMName, s.EnableTPM)
+			if err != nil {
+				err := fmt.Errorf("Error enabling TPM: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 
