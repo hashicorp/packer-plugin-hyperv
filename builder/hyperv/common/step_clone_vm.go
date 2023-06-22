@@ -33,6 +33,7 @@ type StepCloneVM struct {
 	EnableSecureBoot               bool
 	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
+	EnableTPM                      bool
 	MacAddress                     string
 	KeepRegistered                 bool
 	AdditionalDiskSize             []uint
@@ -116,6 +117,16 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+
+		if s.EnableTPM {
+			err = driver.SetVirtualMachineTPM(s.VMName, s.EnableTPM)
+			if err != nil {
+				err := fmt.Errorf("Error enabling TPM: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 

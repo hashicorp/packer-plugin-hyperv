@@ -193,6 +193,11 @@ type DriverMock struct {
 	SetVirtualMachineVirtualizationExtensions_Enable bool
 	SetVirtualMachineVirtualizationExtensions_Err    error
 
+	SetVirtualMachineTPM_Called bool
+	SetVirtualMachineTPM_VmName string
+	SetVirtualMachineTPM_Enable bool
+	SetVirtualMachineTPM_Err    error
+
 	EnableVirtualMachineIntegrationService_Called                 bool
 	EnableVirtualMachineIntegrationService_VmName                 string
 	EnableVirtualMachineIntegrationService_IntegrationServiceName string
@@ -533,6 +538,13 @@ func (d *DriverMock) SetVirtualMachineVirtualizationExtensions(vmName string, en
 	d.SetVirtualMachineVirtualizationExtensions_VmName = vmName
 	d.SetVirtualMachineVirtualizationExtensions_Enable = enable
 	return d.SetVirtualMachineVirtualizationExtensions_Err
+}
+
+func (d *DriverMock) SetVirtualMachineTPM(vmName string, enable bool) error {
+	d.SetVirtualMachineTPM_Called = true
+	d.SetVirtualMachineTPM_VmName = vmName
+	d.SetVirtualMachineTPM_Enable = enable
+	return d.SetVirtualMachineTPM_Err
 }
 
 func (d *DriverMock) EnableVirtualMachineIntegrationService(vmName string, integrationServiceName string) error {
