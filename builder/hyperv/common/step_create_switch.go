@@ -20,7 +20,8 @@ const (
 // This step creates switch for VM.
 //
 // Produces:
-//   SwitchName string - The name of the Switch
+//
+//	SwitchName string - The name of the Switch
 type StepCreateSwitch struct {
 	// Specifies the name of the switch to be created.
 	SwitchName string
