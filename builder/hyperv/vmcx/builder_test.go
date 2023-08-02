@@ -149,7 +149,7 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	}
 }
 
-//nolint
+// nolint
 func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmcxPathRequired(t *testing.T) {
 	var b Builder
 	config := testConfig()

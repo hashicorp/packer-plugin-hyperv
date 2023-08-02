@@ -12,7 +12,6 @@ import (
 )
 
 // This resizes the first vhd on the virtual machine to the specified DiskSize (in MB)
-//
 type StepResizeVhd struct {
 	DiskSize *uint
 }

@@ -15,7 +15,8 @@ import (
 // This step creates an external switch for the VM.
 //
 // Produces:
-//   SwitchName string - The name of the Switch
+//
+//	SwitchName string - The name of the Switch
 type StepCreateExternalSwitch struct {
 	SwitchName    string
 	oldSwitchName string

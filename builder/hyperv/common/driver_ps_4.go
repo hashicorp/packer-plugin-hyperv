@@ -140,12 +140,12 @@ func (d *HypervPS4Driver) GetVirtualMachineNetworkAdapterAddress(vmName string) 
 	return hyperv.GetVirtualMachineNetworkAdapterAddress(vmName)
 }
 
-//Set the vlan to use for switch
+// Set the vlan to use for switch
 func (d *HypervPS4Driver) SetNetworkAdapterVlanId(switchName string, vlanId string) error {
 	return hyperv.SetNetworkAdapterVlanId(switchName, vlanId)
 }
 
-//Set the vlan to use for machine
+// Set the vlan to use for machine
 func (d *HypervPS4Driver) SetVirtualMachineVlanId(vmName string, vlanId string) error {
 	return hyperv.SetVirtualMachineVlanId(vmName, vlanId)
 }
@@ -154,7 +154,7 @@ func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac strin
 	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
 }
 
-//Replace the network adapter with a (non-)legacy adapter
+// Replace the network adapter with a (non-)legacy adapter
 func (d *HypervPS4Driver) ReplaceVirtualMachineNetworkAdapter(vmName string, virtual bool) error {
 	return hyperv.ReplaceVirtualMachineNetworkAdapter(vmName, virtual)
 }

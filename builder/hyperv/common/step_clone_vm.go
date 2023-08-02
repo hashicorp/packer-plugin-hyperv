@@ -17,7 +17,8 @@ import (
 // This step clones an existing virtual machine.
 //
 // Produces:
-//   VMName string - The name of the VM
+//
+//	VMName string - The name of the VM
 type StepCloneVM struct {
 	CloneFromVMCXPath              string
 	CloneFromVMName                string

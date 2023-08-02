@@ -327,7 +327,6 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 //
 // For examples of what this template will generate, you can look at the
 // test cases in ./hyperv_test.go
-//
 func getCreateVMScript(opts *scriptOptions) (string, error) {
 
 	if opts.FixedVHD && opts.Generation == 2 {
