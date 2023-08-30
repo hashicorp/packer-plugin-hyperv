@@ -173,7 +173,7 @@ In HCL2:
 <!-- End of code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -207,7 +207,7 @@ In HCL2:
 - `clone_from_vm_name` (string) - The name of the VM to clone from. Ideally
   the machine to clone from should be shutdown.
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the Config struct in builder/hyperv/vmcx/builder.go; DO NOT EDIT MANUALLY -->
 
@@ -392,9 +392,7 @@ In HCL2:
 <!-- End of code generated from the comments of the CommonConfig struct in builder/hyperv/common/config.go; -->
 
 
-## Communicator configuration reference
-
-### Optional common fields:
+### Communicator configuration reference
 
 <!-- Code generated from the comments of the Config struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
@@ -428,7 +426,7 @@ In HCL2:
 <!-- End of code generated from the comments of the Config struct in communicator/config.go; -->
 
 
-### Optional SSH fields:
+#### SSH fields:
 
 <!-- Code generated from the comments of the SSH struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
@@ -539,7 +537,7 @@ In HCL2:
   of current user.
 
 
-### Optional WinRM fields:
+#### WinRM fields:
 
 <!-- Code generated from the comments of the WinRM struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
@@ -595,7 +593,7 @@ boot time.
 <!-- End of code generated from the comments of the CDConfig struct in multistep/commonsteps/extra_iso_config.go; -->
 
 
-#### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the CDConfig struct in multistep/commonsteps/extra_iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -664,7 +662,7 @@ boot time.
 <!-- End of code generated from the comments of the CDConfig struct in multistep/commonsteps/extra_iso_config.go; -->
 
 
-## Boot Command
+### Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys to
 type when the virtual machine is first booted in order to start the OS
@@ -768,7 +766,7 @@ The example shown below is a working boot command used to start an Ubuntu
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools#templates).
 
-## Http directory configuration
+### HTTP directory configuration
 
 <!-- Code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; DO NOT EDIT MANUALLY -->
 
@@ -785,7 +783,7 @@ wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/foo/bar/preseed.cfg
 <!-- End of code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; DO NOT EDIT MANUALLY -->
 
