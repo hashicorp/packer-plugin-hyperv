@@ -78,7 +78,7 @@ builder.
 
 @include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
 
-### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
 
@@ -97,25 +97,23 @@ builder.
 - `clone_from_vm_name` (string) - The name of the VM to clone from. Ideally
   the machine to clone from should be shutdown.
 
-### Optional:
+**Optional:**
 
 @include 'builder/hyperv/vmcx/Config-not-required.mdx'
 
 @include 'builder/hyperv/common/CommonConfig-not-required.mdx'
 
-## Communicator configuration reference
-
-### Optional common fields:
+### Communicator configuration reference
 
 @include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
 
-### Optional SSH fields:
+#### SSH fields:
 
 @include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
 
 @include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
-### Optional WinRM fields:
+#### WinRM fields:
 
 @include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
 
@@ -123,11 +121,11 @@ builder.
 
 @include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
 
-#### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
 
-## Boot Command
+### Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys to
 type when the virtual machine is first booted in order to start the OS
@@ -231,11 +229,11 @@ The example shown below is a working boot command used to start an Ubuntu
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools#templates).
 
-## Http directory configuration
+### HTTP directory configuration
 
 @include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
 
-### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 

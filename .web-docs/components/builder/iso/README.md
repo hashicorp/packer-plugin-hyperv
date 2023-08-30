@@ -35,7 +35,17 @@ leading to corruption of files or lost changes. As such, it is important to
 add a `shutdown_command`. This tells Packer how to safely shutdown and
 power off the VM.
 
-## ISO Configuration Reference
+## Configuration Reference
+
+There are many configuration options available for the Hyper-V builder. They
+are organized below into two categories: required and optional. Within each
+category, the available options are alphabetized and described.
+
+In addition to the options listed here, a
+[communicator](/packer/docs/templates/legacy_json_templates/communicator) can be configured for this
+builder.
+
+### ISO Configuration Reference
 
 <!-- Code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -119,7 +129,6 @@ In HCL2:
 <!-- End of code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; -->
 
 
-### Required:
 
 <!-- Code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -150,7 +159,7 @@ In HCL2:
 <!-- End of code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -168,18 +177,6 @@ In HCL2:
 
 <!-- End of code generated from the comments of the ISOConfig struct in multistep/commonsteps/iso_config.go; -->
 
-
-## Configuration Reference
-
-There are many configuration options available for the Hyper-V builder. They
-are organized below into two categories: required and optional. Within each
-category, the available options are alphabetized and described.
-
-In addition to the options listed here, a
-[communicator](/packer/docs/templates/legacy_json_templates/communicator) can be configured for this
-builder.
-
-### Optional:
 
 - `output_directory` (string) - This setting specifies the directory that
 artifacts from the build, such as the virtual machine files and disks,
@@ -368,7 +365,7 @@ created, must be empty prior to running the builder. By default this is
 <!-- End of code generated from the comments of the CommonConfig struct in builder/hyperv/common/config.go; -->
 
 
-## Http directory configuration reference
+### HTTP Directory configuration
 
 <!-- Code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; DO NOT EDIT MANUALLY -->
 
@@ -385,7 +382,7 @@ wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/foo/bar/preseed.cfg
 <!-- End of code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; DO NOT EDIT MANUALLY -->
 
@@ -426,9 +423,7 @@ wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/foo/bar/preseed.cfg
 <!-- End of code generated from the comments of the HTTPConfig struct in multistep/commonsteps/http_config.go; -->
 
 
-## Shutdown configuration reference
-
-### Optional:
+### Shutdown configuration reference
 
 <!-- Code generated from the comments of the ShutdownConfig struct in shutdowncommand/config.go; DO NOT EDIT MANUALLY -->
 
@@ -449,7 +444,7 @@ wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/foo/bar/preseed.cfg
 <!-- End of code generated from the comments of the ShutdownConfig struct in shutdowncommand/config.go; -->
 
 
-## Floppy configuration reference
+### Floppy configuration reference
 
 <!-- Code generated from the comments of the FloppyConfig struct in multistep/commonsteps/floppy_config.go; DO NOT EDIT MANUALLY -->
 
@@ -465,7 +460,7 @@ provisioner](/packer/docs/provisioner/file).
 <!-- End of code generated from the comments of the FloppyConfig struct in multistep/commonsteps/floppy_config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the FloppyConfig struct in multistep/commonsteps/floppy_config.go; DO NOT EDIT MANUALLY -->
 
@@ -504,7 +499,7 @@ provisioner](/packer/docs/provisioner/file).
 <!-- End of code generated from the comments of the FloppyConfig struct in multistep/commonsteps/floppy_config.go; -->
 
 
-### CD configuration reference
+#### CD configuration reference
 
 <!-- Code generated from the comments of the CDConfig struct in multistep/commonsteps/extra_iso_config.go; DO NOT EDIT MANUALLY -->
 
@@ -573,9 +568,9 @@ provisioner](/packer/docs/provisioner/file).
 <!-- End of code generated from the comments of the CDConfig struct in multistep/commonsteps/extra_iso_config.go; -->
 
 
-## Communicator configuration reference
+### Communicator configuration reference
 
-### Optional common fields:
+#### Optional common fields:
 
 <!-- Code generated from the comments of the Config struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
@@ -720,7 +715,7 @@ provisioner](/packer/docs/provisioner/file).
   of current user.
 
 
-### Optional WinRM fields:
+#### Optional WinRM fields:
 
 <!-- Code generated from the comments of the WinRM struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
@@ -759,7 +754,7 @@ provisioner](/packer/docs/provisioner/file).
 <!-- End of code generated from the comments of the WinRM struct in communicator/config.go; -->
 
 
-## Boot Configuration Reference
+### Boot Configuration Reference
 
 <!-- Code generated from the comments of the BootConfig struct in bootcommand/config.go; DO NOT EDIT MANUALLY -->
 
@@ -901,7 +896,7 @@ For more examples of various boot commands, see the sample projects from our
 <!-- End of code generated from the comments of the BootConfig struct in bootcommand/config.go; -->
 
 
-### Optional:
+**Optional:**
 
 <!-- Code generated from the comments of the BootConfig struct in bootcommand/config.go; DO NOT EDIT MANUALLY -->
 

@@ -47,18 +47,6 @@ leading to corruption of files or lost changes. As such, it is important to
 add a `shutdown_command`. This tells Packer how to safely shutdown and
 power off the VM.
 
-## ISO Configuration Reference
-
-@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig.mdx'
-
-### Required:
-
-@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
-
-### Optional:
-
-@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
-
 ## Configuration Reference
 
 There are many configuration options available for the Hyper-V builder. They
@@ -69,7 +57,16 @@ In addition to the options listed here, a
 [communicator](/packer/docs/templates/legacy_json_templates/communicator) can be configured for this
 builder.
 
-### Optional:
+### ISO Configuration Reference
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig.mdx'
+
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
+
+**Optional:**
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
 
 - `output_directory` (string) - This setting specifies the directory that
 artifacts from the build, such as the virtual machine files and disks,
@@ -83,35 +80,33 @@ created, must be empty prior to running the builder. By default this is
 
 @include 'builder/hyperv/common/CommonConfig-not-required.mdx'
 
-## Http directory configuration reference
+### HTTP Directory configuration
 
 @include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
 
-### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 
-## Shutdown configuration reference
-
-### Optional:
+### Shutdown configuration reference
 
 @include 'packer-plugin-sdk/shutdowncommand/ShutdownConfig-not-required.mdx'
 
-## Floppy configuration reference
+### Floppy configuration reference
 
 @include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig.mdx'
 
-### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig-not-required.mdx'
 
-### CD configuration reference
+#### CD configuration reference
 
 @include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
 
-## Communicator configuration reference
+### Communicator configuration reference
 
-### Optional common fields:
+#### Optional common fields:
 
 @include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
 
@@ -121,15 +116,15 @@ created, must be empty prior to running the builder. By default this is
 
 @include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
-### Optional WinRM fields:
+#### Optional WinRM fields:
 
 @include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
 
-## Boot Configuration Reference
+### Boot Configuration Reference
 
 @include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
 
-### Optional:
+**Optional:**
 
 @include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
 

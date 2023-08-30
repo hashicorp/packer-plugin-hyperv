@@ -27,12 +27,11 @@ $ packer plugins install github.com/hashicorp/hyperv
 
 #### Builders
 
-- [hyperv-iso](packer/integrations/hashicorp/hyperv/latest/components/builder/hyperv-iso.mdx) - Starts from an ISO file,
+- [hyperv-iso](packer/integrations/hashicorp/hyperv/latest/components/builder/iso) - Starts from an ISO file,
   creates a brand new Hyper-V VM, installs an OS, provisions software within
   the OS, then exports that machine to create an image. This is best for
   people who want to start from scratch.
 
-- [hyperv-vmcx](packer/integrations/hashicorp/hyperv/latest/components/builder/hyperv-vmcx.mdx) - Clones an an existing
-  virtual machine, provisions software within the OS, then exports that
-  machine to create an image. This is best for people who have existing base
+- [hyperv-vmcx](packer/integrations/hashicorp/hyperv/latest/components/builder/vmcx) - Clones an existing
+  virtual machine, provisions software within the OS, then exports that machine to create an image. This is best for people who have existing base
   images and want to customize them.
