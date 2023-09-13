@@ -25,7 +25,7 @@ type StepCloneVM struct {
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
 	VMName                         string
-	SwitchName                     string
+	SwitchName                     []string
 	CompareCopy                    bool
 	RamSize                        uint
 	Cpu                            uint

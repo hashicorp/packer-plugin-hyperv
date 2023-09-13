@@ -24,7 +24,7 @@ const (
 //	SwitchName string - The name of the Switch
 type StepCreateSwitch struct {
 	// Specifies the name of the switch to be created.
-	SwitchName string
+	SwitchName []string
 	// Specifies the type of the switch to be created. Allowed values are Internal and Private. To create an External
 	// virtual switch, specify either the NetAdapterInterfaceDescription or the NetAdapterName parameter, which
 	// implicitly set the type of the virtual switch to External.
@@ -47,19 +47,21 @@ func (s *StepCreateSwitch) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say(fmt.Sprintf("Creating switch '%v' if required...", s.SwitchName))
 
-	createdSwitch, err := driver.CreateVirtualSwitch(s.SwitchName, s.SwitchType)
-	if err != nil {
-		err := fmt.Errorf("Error creating switch: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		s.SwitchName = ""
-		return multistep.ActionHalt
-	}
+	for _, switchName := range s.SwitchName {
+		createdSwitch, err := driver.CreateVirtualSwitch(switchName, s.SwitchType)
+		if err != nil {
+			err := fmt.Errorf("Error creating switch: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			switchName = ""
+			return multistep.ActionHalt
+		}
 
-	s.createdSwitch = createdSwitch
+		s.createdSwitch = createdSwitch
 
-	if !s.createdSwitch {
-		ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", s.SwitchName))
+		if !s.createdSwitch {
+			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", s.SwitchName))
+		}
 	}
 
 	// Set the final name in the state bag so others can use it
@@ -77,8 +79,10 @@ func (s *StepCreateSwitch) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Unregistering and deleting switch...")
 
-	err := driver.DeleteVirtualSwitch(s.SwitchName)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting switch: %s", err))
+	for _, switchName := range s.SwitchName {
+		err := driver.DeleteVirtualSwitch(switchName)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting switch: %s", err))
+		}
 	}
 }

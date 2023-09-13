@@ -25,7 +25,7 @@ type bootCommandTemplateData struct {
 type StepTypeBootCommand struct {
 	BootCommand   string
 	BootWait      time.Duration
-	SwitchName    string
+	SwitchName    []string
 	Ctx           interpolate.Context
 	GroupInterval time.Duration
 }

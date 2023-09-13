@@ -21,7 +21,7 @@ import (
 //	VMName string - The name of the VM
 type StepCreateVM struct {
 	VMName                         string
-	SwitchName                     string
+	SwitchName                     []string
 	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint

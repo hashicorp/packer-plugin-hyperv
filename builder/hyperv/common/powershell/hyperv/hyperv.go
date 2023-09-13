@@ -26,7 +26,7 @@ type scriptOptions struct {
 	MemoryStartupBytes int64
 	NewVHDSizeBytes    int64
 	VHDBlockSizeBytes  int64
-	SwitchName         string
+	SwitchName         []string
 	Generation         uint
 	DiffDisks          bool
 	FixedVHD           bool
@@ -355,9 +355,13 @@ $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
     {{- end -}}
 {{- end }}
 
-Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName }}"
+Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName[0] }}"
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
+
+{{- range _, $switchName := .SwitchName -}}
+Hyper-V\Add-VMNetworkAdapter -VMName "{{ .VMName }}" -SwitchName "{{ .switchName }}"
+{{- end -}}
 `))
 
 	var b bytes.Buffer
@@ -396,7 +400,7 @@ func CheckVMName(vmName string) error {
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diskSize int64, diskBlockSize int64, switchName []string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 	opts := scriptOptions{
 		Version:            version,
@@ -522,7 +526,7 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 }
 
 func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
-	ram int64, switchName string, copyTF bool) error {
+	ram int64, switchName []string, copyTF bool) error {
 
 	var script = `
 param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy)
@@ -578,14 +582,14 @@ if ($vm) {
 }
 	`
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName, strconv.FormatBool(copyTF))
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName[0], strconv.FormatBool(copyTF))
 
 	return err
 }
 
 func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
-	path string, harddrivePath string, ram int64, switchName string, copyTF bool) error {
+	path string, harddrivePath string, ram int64, switchName []string, copyTF bool) error {
 
 	if cloneFromVmName != "" {
 		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
