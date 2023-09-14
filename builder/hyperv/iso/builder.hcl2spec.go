@@ -96,7 +96,7 @@ type FlatConfig struct {
 	GuestAdditionsMode             *string           `mapstructure:"guest_additions_mode" required:"false" cty:"guest_additions_mode" hcl:"guest_additions_mode"`
 	GuestAdditionsPath             *string           `mapstructure:"guest_additions_path" required:"false" cty:"guest_additions_path" hcl:"guest_additions_path"`
 	VMName                         *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
-	SwitchName                     *string           `mapstructure:"switch_name" required:"false" cty:"switch_name" hcl:"switch_name"`
+	SwitchName                     []string          `mapstructure:"switch_name" required:"false" cty:"switch_name" hcl:"switch_name"`
 	SwitchVlanId                   *string           `mapstructure:"switch_vlan_id" required:"false" cty:"switch_vlan_id" hcl:"switch_vlan_id"`
 	MacAddress                     *string           `mapstructure:"mac_address" required:"false" cty:"mac_address" hcl:"mac_address"`
 	VlanId                         *string           `mapstructure:"vlan_id" required:"false" cty:"vlan_id" hcl:"vlan_id"`
@@ -223,7 +223,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"guest_additions_mode":             &hcldec.AttrSpec{Name: "guest_additions_mode", Type: cty.String, Required: false},
 		"guest_additions_path":             &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"vm_name":                          &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
-		"switch_name":                      &hcldec.AttrSpec{Name: "switch_name", Type: cty.String, Required: false},
+		"switch_name":                      &hcldec.AttrSpec{Name: "switch_name", Type: cty.List(cty.String), Required: false},
 		"switch_vlan_id":                   &hcldec.AttrSpec{Name: "switch_vlan_id", Type: cty.String, Required: false},
 		"mac_address":                      &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
 		"vlan_id":                          &hcldec.AttrSpec{Name: "vlan_id", Type: cty.String, Required: false},

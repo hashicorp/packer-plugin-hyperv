@@ -30,6 +30,7 @@ type scriptOptions struct {
 	Generation         uint
 	DiffDisks          bool
 	FixedVHD           bool
+	Switches           []string
 }
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
@@ -338,6 +339,8 @@ func getCreateVMScript(opts *scriptOptions) (string, error) {
 		opts.VHDX = opts.VMName + ".vhd"
 	}
 
+	opts.Switches = opts.SwitchName[1:]
+
 	var tpl = template.Must(template.New("createVM").Parse(`
 $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
 
@@ -355,12 +358,12 @@ $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
     {{- end -}}
 {{- end }}
 
-Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName[0] }}"
+Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ index .SwitchName 0 }}"
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
 
-{{- range _, $switchName := .SwitchName -}}
-Hyper-V\Add-VMNetworkAdapter -VMName "{{ .VMName }}" -SwitchName "{{ .switchName }}"
+{{ range $i, $switchName := .Switches }}
+Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}"
 {{- end -}}
 `))
 
