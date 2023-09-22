@@ -35,3 +35,11 @@ $ packer plugins install github.com/hashicorp/hyperv
 - [hyperv-vmcx](packer/integrations/hashicorp/hyperv/latest/components/builder/vmcx) - Clones an existing
   virtual machine, provisions software within the OS, then exports that machine to create an image. This is best for people who have existing base
   images and want to customize them.
+
+### Running from WSL2
+
+This plugin supports being run from WSL2 provided its run from a windows filesystem and the PACKER_CACHE_DIR is set to a path on the windows filesystem.
+
+For example, assuming a Windows username of `user`:
+    
+    /mnt/c/Users/user/$ PACKER_CACHE_DIR=/mnt/c/Users/user/.packer packer build ...
