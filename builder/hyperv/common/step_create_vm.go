@@ -21,7 +21,8 @@ import (
 //	VMName string - The name of the VM
 type StepCreateVM struct {
 	VMName                         string
-	SwitchName                     []string
+	SwitchName                     string
+	SwitchesNames                  []string
 	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint
@@ -80,7 +81,7 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
 
 	err = driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
-		s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
+		s.SwitchName, s.SwitchesNames, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)

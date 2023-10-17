@@ -26,11 +26,11 @@ type scriptOptions struct {
 	MemoryStartupBytes int64
 	NewVHDSizeBytes    int64
 	VHDBlockSizeBytes  int64
-	SwitchName         []string
+	SwitchName         string
+	SwitchesNames      []string
 	Generation         uint
 	DiffDisks          bool
 	FixedVHD           bool
-	Switches           []string
 }
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
@@ -339,8 +339,6 @@ func getCreateVMScript(opts *scriptOptions) (string, error) {
 		opts.VHDX = opts.VMName + ".vhd"
 	}
 
-	opts.Switches = opts.SwitchName[1:]
-
 	var tpl = template.Must(template.New("createVM").Parse(`
 $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
 
@@ -358,13 +356,13 @@ $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
     {{- end -}}
 {{- end }}
 
-Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ index .SwitchName 0 }}"
+Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName }}"
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
-{{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
+{{- if ne .Version ""}} -Version {{ .Version }} {{- end }}
 
-{{ range $i, $switchName := .Switches }}
+{{ range $i, $switchName := .SwitchesNames -}}
 Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}"
-{{- end -}}
+{{ end -}}
 `))
 
 	var b bytes.Buffer
@@ -403,7 +401,7 @@ func CheckVMName(vmName string) error {
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName []string, generation uint,
+	diskSize int64, diskBlockSize int64, switchName string, switchesNames []string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 	opts := scriptOptions{
 		Version:            version,
@@ -414,6 +412,7 @@ func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram 
 		NewVHDSizeBytes:    diskSize,
 		VHDBlockSizeBytes:  diskBlockSize,
 		SwitchName:         switchName,
+		SwitchesNames:      switchesNames,
 		Generation:         generation,
 		DiffDisks:          diffDisks,
 		FixedVHD:           fixedVHD,
@@ -529,10 +528,10 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 }
 
 func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
-	ram int64, switchName []string, copyTF bool) error {
+	ram int64, switchName string, switchesNames []string, copyTF bool) error {
 
 	var script = `
-param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy)
+param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy, [string[]]$switchesNames)
 
 $VirtualHarddisksPath = Join-Path -Path $importPath -ChildPath 'Virtual Hard Disks'
 if (!(Test-Path $VirtualHarddisksPath)) {
@@ -578,21 +577,25 @@ Hyper-V\Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupByt
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
 Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
+foreach ($switch in $switchesNames) {
+	Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch
+}
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
 if ($vm) {
     $result = Hyper-V\Rename-VM -VM $vm -NewName $VMName
 }
 	`
+	switchesArray := strings.Join(switchesNames, ",")
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName[0], strconv.FormatBool(copyTF))
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName, strconv.FormatBool(copyTF), switchesArray)
 
 	return err
 }
 
 func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
-	path string, harddrivePath string, ram int64, switchName []string, copyTF bool) error {
+	path string, harddrivePath string, ram int64, switchName string, switchesNames []string, copyTF bool) error {
 
 	if cloneFromVmName != "" {
 		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
@@ -607,7 +610,7 @@ func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 		}
 	}
 
-	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName, copyTF); err != nil {
+	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName, switchesNames, copyTF); err != nil {
 		return err
 	}
 

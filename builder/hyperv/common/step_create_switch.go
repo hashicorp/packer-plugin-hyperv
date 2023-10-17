@@ -22,9 +22,10 @@ const (
 // Produces:
 //
 //	SwitchName string - The name of the Switch
-type StepCreateSwitch struct {
+type StepCreateSwitches struct {
 	// Specifies the name of the switch to be created.
-	SwitchName []string
+	MainSwitchName string
+	SwitchesNames  []string
 	// Specifies the type of the switch to be created. Allowed values are Internal and Private. To create an External
 	// virtual switch, specify either the NetAdapterInterfaceDescription or the NetAdapterName parameter, which
 	// implicitly set the type of the virtual switch to External.
@@ -34,10 +35,10 @@ type StepCreateSwitch struct {
 	// Specifies the interface description of the network adapter to be bound to the switch to be created.
 	NetAdapterInterfaceDescription string
 
-	createdSwitch bool
+	createdSwitch []bool
 }
 
-func (s *StepCreateSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSwitches) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 
@@ -45,33 +46,35 @@ func (s *StepCreateSwitch) Run(ctx context.Context, state multistep.StateBag) mu
 		s.SwitchType = DefaultSwitchType
 	}
 
-	ui.Say(fmt.Sprintf("Creating switch '%v' if required...", s.SwitchName))
+	switches := append([]string{s.MainSwitchName}, s.SwitchesNames...)
 
-	for _, switchName := range s.SwitchName {
+	for index, switchName := range switches {
+		ui.Say(fmt.Sprintf("Creating switch '%v' if required...", switchName))
 		createdSwitch, err := driver.CreateVirtualSwitch(switchName, s.SwitchType)
 		if err != nil {
 			err := fmt.Errorf("Error creating switch: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			switchName = ""
 			return multistep.ActionHalt
 		}
 
-		s.createdSwitch = createdSwitch
+		s.createdSwitch = append(s.createdSwitch, createdSwitch)
+		fmt.Sprintf("switches: '%v'", s.createdSwitch)
 
-		if !s.createdSwitch {
-			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", s.SwitchName))
+		if !s.createdSwitch[index] {
+			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", switchName))
 		}
 	}
 
 	// Set the final name in the state bag so others can use it
-	state.Put("SwitchName", s.SwitchName)
+	state.Put("SwitchName", s.MainSwitchName)
+	state.Put("SwitchesNames", s.SwitchesNames)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateSwitch) Cleanup(state multistep.StateBag) {
-	if len(s.SwitchName) == 0 || !s.createdSwitch {
+func (s *StepCreateSwitches) Cleanup(state multistep.StateBag) {
+	if s.MainSwitchName == "" && len(s.SwitchesNames) == 0 {
 		return
 	}
 
@@ -79,10 +82,14 @@ func (s *StepCreateSwitch) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Unregistering and deleting switch...")
 
-	for _, switchName := range s.SwitchName {
-		err := driver.DeleteVirtualSwitch(switchName)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error deleting switch: %s", err))
+	switches := append([]string{s.MainSwitchName}, s.SwitchesNames...)
+
+	for index, switchName := range switches {
+		if s.createdSwitch[index] {
+			err := driver.DeleteVirtualSwitch(switchName)
+			if err != nil {
+				ui.Error(fmt.Sprintf("Error deleting switch: %s", err))
+			}
 		}
 	}
 }

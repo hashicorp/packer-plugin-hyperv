@@ -222,12 +222,14 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
-		&hypervcommon.StepCreateSwitch{
-			SwitchName: b.config.SwitchName,
+		&hypervcommon.StepCreateSwitches{
+			MainSwitchName: b.config.SwitchName,
+			SwitchesNames:  b.config.SwitchesNames,
 		},
 		&hypervcommon.StepCreateVM{
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
+			SwitchesNames:                  b.config.SwitchesNames,
 			RamSize:                        b.config.RamSize,
 			DiskSize:                       b.config.DiskSize,
 			DiskBlockSize:                  b.config.DiskBlockSize,

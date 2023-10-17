@@ -17,7 +17,7 @@ import (
 type StepRun struct {
 	GuiCancelFunc context.CancelFunc
 	Headless      bool
-	SwitchName    []string
+	SwitchName    string
 	vmName        string
 }
 
@@ -27,7 +27,7 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	vmName := state.Get("vmName").(string)
 
 	ui.Say("Determine Host IP for HyperV machine...")
-	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName[0])
+	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
 	if err != nil {
 		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
 		state.Put("error", err)

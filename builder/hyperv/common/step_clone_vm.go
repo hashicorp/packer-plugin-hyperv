@@ -25,7 +25,8 @@ type StepCloneVM struct {
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
 	VMName                         string
-	SwitchName                     []string
+	SwitchName                     string
+	SwitchesNames                  []string
 	CompareCopy                    bool
 	RamSize                        uint
 	Cpu                            uint
@@ -66,7 +67,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName,
 		s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path,
-		harddrivePath, ramSize, s.SwitchName, s.CompareCopy)
+		harddrivePath, ramSize, s.SwitchName, s.SwitchesNames, s.CompareCopy)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)

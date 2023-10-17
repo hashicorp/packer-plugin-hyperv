@@ -74,11 +74,15 @@ type CommonConfig struct {
 	// without the file extension. By default this is "packer-BUILDNAME",
 	// where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name" required:"false"`
-	// The name of the switch to connect the virtual
+	// The name of the main switch to connect the virtual
 	// machine to. By default, leaving this value unset will cause Packer to
 	// try and determine the switch to use by looking for an external switch
 	// that is up and running.
-	SwitchName []string `mapstructure:"switch_name" required:"false"`
+	SwitchName string `mapstructure:"switch_name" required:"false"`
+	// The name of the switches to connect the virtual
+	// machine to. By default, leaving this value unset will cause Packer to
+	// not use any additional switches
+	SwitchesNames []string `mapstructure:"switches_names" required:"false"`
 	// This is the VLAN of the virtual switch's
 	// network card. By default none is set. If none is set then a VLAN is not
 	// set on the switch's network card. If this value is set it should match
@@ -195,9 +199,9 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 		log.Printf("%s: %v", "VMName", c.VMName)
 	}
 
-	if len(c.SwitchName) == 0 {
-		c.SwitchName = append(c.SwitchName, c.detectSwitchName(pc.PackerBuildName))
-		log.Printf("Using switch %s", c.SwitchName[0])
+	if c.SwitchName == "" {
+		c.SwitchName = c.detectSwitchName(pc.PackerBuildName)
+		log.Printf("Using switch %s", c.SwitchName)
 	}
 
 	if c.Generation < 1 || c.Generation > 2 {

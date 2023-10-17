@@ -22,7 +22,7 @@ func (s *StepConfigureVlan) Run(ctx context.Context, state multistep.StateBag) m
 
 	errorMsg := "Error configuring vlan: %s"
 	vmName := state.Get("vmName").(string)
-	switchName := state.Get("SwitchName").([]string)[0]
+	switchName := state.Get("SwitchName").(string)
 	vlanId := s.VlanId
 	switchVlanId := s.SwitchVlanId
 

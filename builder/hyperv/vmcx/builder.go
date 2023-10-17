@@ -263,8 +263,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
-		&hypervcommon.StepCreateSwitch{
-			SwitchName: b.config.SwitchName,
+		&hypervcommon.StepCreateSwitches{
+			MainSwitchName: b.config.SwitchName,
+			SwitchesNames:  b.config.SwitchesNames,
 		},
 		&hypervcommon.StepCloneVM{
 			CloneFromVMCXPath:              b.config.CloneFromVMCXPath,
@@ -273,6 +274,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
+			SwitchesNames:                  b.config.SwitchesNames,
 			CompareCopy:                    b.config.CompareCopy,
 			RamSize:                        b.config.RamSize,
 			Cpu:                            b.config.Cpu,
