@@ -1045,7 +1045,7 @@ func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
 param([string]$switchName,[string]$switchType)
 $switches = Hyper-V\Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switches.Count -eq 0) {
-  Hyper-V\New-VMSwitch -Name $switchName -SwitchType $switchType
+  $ignoreMe = Hyper-V\New-VMSwitch -Name $switchName -SwitchType $switchType
   return $true
 }
 return $false

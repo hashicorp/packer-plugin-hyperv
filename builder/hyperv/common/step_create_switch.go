@@ -59,7 +59,6 @@ func (s *StepCreateSwitches) Run(ctx context.Context, state multistep.StateBag) 
 		}
 
 		s.createdSwitch = append(s.createdSwitch, createdSwitch)
-		fmt.Sprintf("switches: '%v'", s.createdSwitch)
 
 		if !s.createdSwitch[index] {
 			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", switchName))
