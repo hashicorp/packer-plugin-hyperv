@@ -82,7 +82,7 @@ type Driver interface {
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, []string, bool) error
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, []string, []string, bool) error
 
 	ResizeVirtualMachineVhd(string, uint64) error
 

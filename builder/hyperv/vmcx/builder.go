@@ -275,6 +275,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
 			SwitchesNames:                  b.config.SwitchesNames,
+			MacAddresses:                   b.config.MacAddresses,
 			CompareCopy:                    b.config.CompareCopy,
 			RamSize:                        b.config.RamSize,
 			Cpu:                            b.config.Cpu,

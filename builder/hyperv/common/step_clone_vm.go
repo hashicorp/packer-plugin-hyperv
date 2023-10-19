@@ -40,6 +40,7 @@ type StepCloneVM struct {
 	KeepRegistered                 bool
 	AdditionalDiskSize             []uint
 	DiskBlockSize                  uint
+	MacAddresses                   []string
 }
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -67,7 +68,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName,
 		s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path,
-		harddrivePath, ramSize, s.SwitchName, s.SwitchesNames, s.CompareCopy)
+		harddrivePath, ramSize, s.SwitchName, s.SwitchesNames, s.MacAddresses, s.CompareCopy)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)

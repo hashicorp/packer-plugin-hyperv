@@ -229,6 +229,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"switches_names":                   &hcldec.AttrSpec{Name: "switches_names", Type: cty.List(cty.String), Required: false},
 		"switch_vlan_id":                   &hcldec.AttrSpec{Name: "switch_vlan_id", Type: cty.String, Required: false},
 		"mac_address":                      &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
+		"mac_addresses":                    &hcldec.AttrSpec{Name: "mac_addresses", Type: cty.List(cty.String), Required: false},
 		"vlan_id":                          &hcldec.AttrSpec{Name: "vlan_id", Type: cty.String, Required: false},
 		"cpus":                             &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"generation":                       &hcldec.AttrSpec{Name: "generation", Type: cty.Number, Required: false},
