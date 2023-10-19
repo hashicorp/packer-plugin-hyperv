@@ -28,6 +28,7 @@ type scriptOptions struct {
 	VHDBlockSizeBytes  int64
 	SwitchName         string
 	SwitchesNames      []string
+	MacAddresses       []string
 	Generation         uint
 	DiffDisks          bool
 	FixedVHD           bool
@@ -361,7 +362,7 @@ Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ 
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end }}
 
 {{ range $i, $switchName := .SwitchesNames -}}
-Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}"
+Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}" -StaticMacAddress {{ index $.MacAddresses $i }}
 {{ end -}}
 `))
 
@@ -401,7 +402,7 @@ func CheckVMName(vmName string) error {
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName string, switchesNames []string, generation uint,
+	diskSize int64, diskBlockSize int64, switchName string, switchesNames []string, macAddresses []string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 	opts := scriptOptions{
 		Version:            version,
@@ -413,6 +414,7 @@ func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram 
 		VHDBlockSizeBytes:  diskBlockSize,
 		SwitchName:         switchName,
 		SwitchesNames:      switchesNames,
+		MacAddresses:       macAddresses,
 		Generation:         generation,
 		DiffDisks:          diffDisks,
 		FixedVHD:           fixedVHD,
@@ -578,7 +580,7 @@ $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
 Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
 foreach ($switch in $switchesNames) {
-	Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch
+	Hyper-V\Add-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch
 }
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 

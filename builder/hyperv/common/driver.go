@@ -78,7 +78,7 @@ type Driver interface {
 
 	CheckVMName(string) error
 
-	CreateVirtualMachine(string, string, string, int64, int64, int64, string, []string, uint, bool, bool, string) error
+	CreateVirtualMachine(string, string, string, int64, int64, int64, string, []string, []string, uint, bool, bool, string) error
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 

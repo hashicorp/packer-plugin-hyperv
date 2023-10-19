@@ -92,6 +92,10 @@ type CommonConfig struct {
 	// the default virtual network card. The MAC address must be a string with
 	// no delimiters, for example "0000deadbeef".
 	MacAddress string `mapstructure:"mac_address" required:"false"`
+	// This allows a specific MAC addresses to be used on
+	// the optional virtual network cards. The MAC addresses must be strings with
+	// no delimiters, for example "0000deadbeef".
+	MacAddresses []string `mapstructure:"mac_addresses" required:"false"`
 	// This is the VLAN of the virtual machine's network
 	// card for the new virtual machine. By default none is set. If none is set
 	// then VLANs are not set on the virtual machine's network card.

@@ -100,6 +100,7 @@ type FlatConfig struct {
 	SwitchesNames                  []string          `mapstructure:"switches_names" required:"false" cty:"switches_names" hcl:"switches_names"`
 	SwitchVlanId                   *string           `mapstructure:"switch_vlan_id" required:"false" cty:"switch_vlan_id" hcl:"switch_vlan_id"`
 	MacAddress                     *string           `mapstructure:"mac_address" required:"false" cty:"mac_address" hcl:"mac_address"`
+	MacAddresses                   []string          `mapstructure:"mac_addresses" required:"false" cty:"mac_addresses" hcl:"mac_addresses"`
 	VlanId                         *string           `mapstructure:"vlan_id" required:"false" cty:"vlan_id" hcl:"vlan_id"`
 	Cpu                            *uint             `mapstructure:"cpus" required:"false" cty:"cpus" hcl:"cpus"`
 	Generation                     *uint             `mapstructure:"generation" required:"false" cty:"generation" hcl:"generation"`

@@ -39,6 +39,7 @@ type StepCreateVM struct {
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
 	MacAddress                     string
+	MacAddresses                   []string
 	FixedVHD                       bool
 	Version                        string
 	KeepRegistered                 bool
@@ -81,7 +82,7 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
 
 	err = driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
-		s.SwitchName, s.SwitchesNames, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
+		s.SwitchName, s.SwitchesNames, s.MacAddresses, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)

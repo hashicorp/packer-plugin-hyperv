@@ -139,6 +139,8 @@ type DriverMock struct {
 	CreateVirtualMachine_DiskSize         int64
 	CreateVirtualMachine_DiskBlockSize    int64
 	CreateVirtualMachine_SwitchName       string
+	CreateVirtualMachine_SwitchesNames    []string
+	CreateVirtualMachine_MacAddresses     []string
 	CreateVirtualMachine_Generation       uint
 	CreateVirtualMachine_DifferentialDisk bool
 	CreateVirtualMachine_FixedVHD         bool
@@ -457,7 +459,7 @@ func (d *DriverMock) CheckVMName(vmName string) error {
 }
 
 func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string,
-	ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	ram int64, diskSize int64, diskBlockSize int64, switchName string, switchesNames []string, macAddresses []string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
@@ -467,6 +469,8 @@ func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddriveP
 	d.CreateVirtualMachine_DiskSize = diskSize
 	d.CreateVirtualMachine_DiskBlockSize = diskBlockSize
 	d.CreateVirtualMachine_SwitchName = switchName
+	d.CreateVirtualMachine_SwitchesNames = switchesNames
+	d.CreateVirtualMachine_MacAddresses = macAddresses
 	d.CreateVirtualMachine_Generation = generation
 	d.CreateVirtualMachine_DifferentialDisk = diffDisks
 	d.CreateVirtualMachine_Version = version
