@@ -361,7 +361,7 @@ Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ 
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
 {{ range $i, $switchName := .SwitchesNames }}
-Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}" -StaticMacAddress "{{ index $.MacAddresses $i }}".Replace("-","")
+Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}"{{ if gt (len $.MacAddresses) $i }} -StaticMacAddress "{{ index $.MacAddresses $i }}".Replace("-","") {{ end }} 
 {{- end -}}
 `))
 
@@ -579,7 +579,10 @@ $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
 Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
 foreach ($switch in $switchesNames) {
+if ($macAddresses[$switchesNames.IndexOf($switch)] -ne $null) {
 	Hyper-V\Add-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch -StaticMacAddress $macAddresses[$switchesNames.IndexOf($switch)].Replace("-","")
+} else {
+   	Hyper-V\Add-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch
 }
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
