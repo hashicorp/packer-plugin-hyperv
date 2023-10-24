@@ -81,19 +81,19 @@ type CommonConfig struct {
 	SwitchName string `mapstructure:"switch_name" required:"false"`
 	// The name of the switches to connect the virtual
 	// machine to. By default, leaving this value unset will cause Packer to
-	// not use any additional switches
+	// not use any additional switches.
 	SwitchesNames []string `mapstructure:"switches_names" required:"false"`
 	// This is the VLAN of the virtual switch's
-	// network card. By default none is set. If none is set then a VLAN is not
+	// network card. By default, none is set. If none is set then a VLAN is not
 	// set on the switch's network card. If this value is set it should match
 	// the VLAN specified in by vlan_id.
 	SwitchVlanId string `mapstructure:"switch_vlan_id" required:"false"`
 	// This allows a specific MAC address to be used on
-	// the default virtual network card. The MAC address must be a string with
+	// the default main virtual network card. The MAC address must be a string with
 	// no delimiters, for example "0000deadbeef".
 	MacAddress string `mapstructure:"mac_address" required:"false"`
 	// This allows a specific MAC addresses to be used on
-	// the optional virtual network cards. The MAC addresses must be strings with
+	// the optional virtual network cards set in `switches_names` array. The MAC addresses must be strings with
 	// no delimiters, for example "0000deadbeef".
 	MacAddresses []string `mapstructure:"mac_addresses" required:"false"`
 	// This is the VLAN of the virtual machine's network
