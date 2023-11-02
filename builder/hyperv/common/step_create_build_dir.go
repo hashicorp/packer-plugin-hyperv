@@ -24,6 +24,9 @@ type StepCreateBuildDir struct {
 	// The full path to the build directory. This is the concatenation of
 	// TempPath plus a directory uniquely named for the build
 	buildDir string
+	// If true, the build directory will not be deleted when the step
+	// Cleanup() method is called
+	KeepRegistered bool
 }
 
 // Creates the main directory used to house the VMs files and folders
@@ -62,6 +65,12 @@ func (s *StepCreateBuildDir) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packersdk.Ui)
+
+	if s.KeepRegistered {
+		ui.Say("Keeping build directory...")
+		return
+	}
+
 	ui.Say("Deleting build directory...")
 
 	err := os.RemoveAll(s.buildDir)
