@@ -202,7 +202,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 
 	steps := []multistep.Step{
 		&hypervcommon.StepCreateBuildDir{
-			TempPath: b.config.TempPath,
+			TempPath:       b.config.TempPath,
+			KeepRegistered: b.config.KeepRegistered,
 		},
 		&commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
