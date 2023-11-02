@@ -66,7 +66,10 @@ func (s *StepCreateBuildDir) Cleanup(state multistep.StateBag) {
 
 	ui := state.Get("ui").(packersdk.Ui)
 
-	if s.KeepRegistered {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+
+	if s.KeepRegistered && !(cancelled || halted) {
 		ui.Say("Keeping build directory...")
 		return
 	}
