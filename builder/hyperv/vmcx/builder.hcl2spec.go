@@ -97,8 +97,10 @@ type FlatConfig struct {
 	GuestAdditionsPath             *string           `mapstructure:"guest_additions_path" required:"false" cty:"guest_additions_path" hcl:"guest_additions_path"`
 	VMName                         *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
 	SwitchName                     *string           `mapstructure:"switch_name" required:"false" cty:"switch_name" hcl:"switch_name"`
+	SwitchesNames                  []string          `mapstructure:"switches_names" required:"false" cty:"switches_names" hcl:"switches_names"`
 	SwitchVlanId                   *string           `mapstructure:"switch_vlan_id" required:"false" cty:"switch_vlan_id" hcl:"switch_vlan_id"`
 	MacAddress                     *string           `mapstructure:"mac_address" required:"false" cty:"mac_address" hcl:"mac_address"`
+	MacAddresses                   []string          `mapstructure:"mac_addresses" required:"false" cty:"mac_addresses" hcl:"mac_addresses"`
 	VlanId                         *string           `mapstructure:"vlan_id" required:"false" cty:"vlan_id" hcl:"vlan_id"`
 	Cpu                            *uint             `mapstructure:"cpus" required:"false" cty:"cpus" hcl:"cpus"`
 	Generation                     *uint             `mapstructure:"generation" required:"false" cty:"generation" hcl:"generation"`
@@ -227,8 +229,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"guest_additions_path":             &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"vm_name":                          &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"switch_name":                      &hcldec.AttrSpec{Name: "switch_name", Type: cty.String, Required: false},
+		"switches_names":                   &hcldec.AttrSpec{Name: "switches_names", Type: cty.List(cty.String), Required: false},
 		"switch_vlan_id":                   &hcldec.AttrSpec{Name: "switch_vlan_id", Type: cty.String, Required: false},
 		"mac_address":                      &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
+		"mac_addresses":                    &hcldec.AttrSpec{Name: "mac_addresses", Type: cty.List(cty.String), Required: false},
 		"vlan_id":                          &hcldec.AttrSpec{Name: "vlan_id", Type: cty.String, Required: false},
 		"cpus":                             &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"generation":                       &hcldec.AttrSpec{Name: "generation", Type: cty.Number, Required: false},

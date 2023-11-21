@@ -78,11 +78,11 @@ type Driver interface {
 
 	CheckVMName(string) error
 
-	CreateVirtualMachine(string, string, string, int64, int64, int64, string, uint, bool, bool, string) error
+	CreateVirtualMachine(string, string, string, int64, int64, int64, string, []string, []string, uint, bool, bool, string) error
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, []string, []string, bool) error
 
 	ResizeVirtualMachineVhd(string, uint64) error
 

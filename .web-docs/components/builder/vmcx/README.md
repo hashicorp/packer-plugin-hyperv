@@ -280,18 +280,26 @@ In HCL2:
   without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
 
-- `switch_name` (string) - The name of the switch to connect the virtual
+- `switch_name` (string) - The name of the main switch to connect the virtual
   machine to. By default, leaving this value unset will cause Packer to
   try and determine the switch to use by looking for an external switch
   that is up and running.
 
+- `switches_names` ([]string) - The name of the switches to connect the virtual
+  machine to. By default, leaving this value unset will cause Packer to
+  not use any additional switches.
+
 - `switch_vlan_id` (string) - This is the VLAN of the virtual switch's
-  network card. By default none is set. If none is set then a VLAN is not
+  network card. By default, none is set. If none is set then a VLAN is not
   set on the switch's network card. If this value is set it should match
   the VLAN specified in by vlan_id.
 
 - `mac_address` (string) - This allows a specific MAC address to be used on
-  the default virtual network card. The MAC address must be a string with
+  the default main virtual network card. The MAC address must be a string with
+  no delimiters, for example "0000deadbeef".
+
+- `mac_addresses` ([]string) - This allows a specific MAC addresses to be used on
+  the optional virtual network cards set in `switches_names` array. The MAC addresses must be strings with
   no delimiters, for example "0000deadbeef".
 
 - `vlan_id` (string) - This is the VLAN of the virtual machine's network
