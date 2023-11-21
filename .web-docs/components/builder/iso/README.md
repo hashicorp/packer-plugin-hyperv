@@ -318,6 +318,8 @@ created, must be empty prior to running the builder. By default this is
 
 - `keep_registered` (bool) - If "true", Packer will not delete the VM from
   The Hyper-V manager.
+  The resulting VM will be housed in a randomly generated folder under %TEMP% by default.
+  You can set the `temp_path` variable to change the location of the folder.
 
 - `skip_compaction` (bool) - If true skip compacting the hard disk for
   the virtual machine when exporting. This defaults to false.
