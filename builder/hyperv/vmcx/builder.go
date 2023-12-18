@@ -218,6 +218,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
+	// Errors
+
+	if b.config.SkipExport {
+		if b.config.KeepRegistered {
+			err = errors.New("skip_export and keep_registered are mutually exclusive.")
+			errs = packersdk.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warnings, errs
 	}

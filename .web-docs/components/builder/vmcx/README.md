@@ -350,6 +350,8 @@ In HCL2:
 
 - `skip_compaction` (bool) - If true skip compacting the hard disk for
   the virtual machine when exporting. This defaults to false.
+  
+  **NB** `keep_registered` is mutually exclusive with `skip_export`.
 
 - `skip_export` (bool) - If true Packer will skip the export of the VM.
   If you are interested only in the VHD/VHDX files, you can enable this
@@ -361,6 +363,8 @@ In HCL2:
   machines by launching a GUI that shows the console of the machine being
   built. When this value is set to true, the machine will start without a
   console.
+  
+  **NB** `skip_export` is mutually exclusive with `keep_registered`.
 
 - `first_boot_device` (string) - When configured, determines the device or device type that is given preferential
   treatment when choosing a boot device.

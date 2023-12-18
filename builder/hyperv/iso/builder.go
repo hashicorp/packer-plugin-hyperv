@@ -154,6 +154,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	// Errors
 
+	if b.config.SkipExport {
+		if b.config.KeepRegistered {
+			err = errors.New("skip_export and keep_registered are mutually exclusive.")
+			errs = packersdk.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if b.config.Generation > 1 && b.config.FixedVHD {
 		err = errors.New("Fixed VHD disks are only supported on Generation 1 virtual machines.")
 		errs = packersdk.MultiErrorAppend(errs, err)

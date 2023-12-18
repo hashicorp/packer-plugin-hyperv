@@ -144,6 +144,8 @@ type CommonConfig struct {
 	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
 	// If true skip compacting the hard disk for
 	// the virtual machine when exporting. This defaults to false.
+	//
+	// **NB** `keep_registered` is mutually exclusive with `skip_export`.
 	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`
 	// If true Packer will skip the export of the VM.
 	// If you are interested only in the VHD/VHDX files, you can enable this
@@ -155,6 +157,8 @@ type CommonConfig struct {
 	// machines by launching a GUI that shows the console of the machine being
 	// built. When this value is set to true, the machine will start without a
 	// console.
+	//
+	// **NB** `skip_export` is mutually exclusive with `keep_registered`.
 	Headless bool `mapstructure:"headless" required:"false"`
 	// When configured, determines the device or device type that is given preferential
 	// treatment when choosing a boot device.
