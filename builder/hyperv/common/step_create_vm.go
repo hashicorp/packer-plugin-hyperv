@@ -21,8 +21,6 @@ import (
 //	VMName string - The name of the VM
 type StepCreateVM struct {
 	VMName                         string
-	SwitchName                     string
-	SwitchesNames                  []string
 	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint
@@ -38,8 +36,6 @@ type StepCreateVM struct {
 	EnableTPM                      bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
-	MacAddress                     string
-	MacAddresses                   []string
 	FixedVHD                       bool
 	Version                        string
 	KeepRegistered                 bool
@@ -49,6 +45,7 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating virtual machine...")
+	swName := state.Get("swName").(string)
 
 	var path string
 	if v, ok := state.GetOk("build_dir"); ok {
@@ -82,22 +79,12 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
 
 	err = driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
-		s.SwitchName, s.SwitchesNames, s.MacAddresses, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
+		swName, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	if s.UseLegacyNetworkAdapter {
-		err := driver.ReplaceVirtualMachineNetworkAdapter(s.VMName, true)
-		if err != nil {
-			err := fmt.Errorf("Error creating legacy network adapter: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
 	}
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
@@ -167,16 +154,6 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-		}
-	}
-
-	if s.MacAddress != "" {
-		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
-		if err != nil {
-			err := fmt.Errorf("Error setting MAC address: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
 		}
 	}
 

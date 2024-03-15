@@ -241,6 +241,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	// Clone will use the discovered switch for outbound access.  All the rest will be inherited from the existing VM.
+	state.Put("swName", b.config.SwitchConfigs[0].SwitchName)
+
 	steps := []multistep.Step{
 		&hypervcommon.StepCreateBuildDir{
 			TempPath:       b.config.TempPath,
@@ -264,19 +267,15 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
-		&hypervcommon.StepCreateSwitches{
-			MainSwitchName: b.config.SwitchName,
-			SwitchesNames:  b.config.SwitchesNames,
-		},
+
+		// Don't create switches, the clone will use the existing ones.
+
 		&hypervcommon.StepCloneVM{
 			CloneFromVMCXPath:              b.config.CloneFromVMCXPath,
 			CloneFromVMName:                b.config.CloneFromVMName,
 			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
 			VMName:                         b.config.VMName,
-			SwitchName:                     b.config.SwitchName,
-			SwitchesNames:                  b.config.SwitchesNames,
-			MacAddresses:                   b.config.MacAddresses,
 			CompareCopy:                    b.config.CompareCopy,
 			RamSize:                        b.config.RamSize,
 			Cpu:                            b.config.Cpu,
@@ -286,7 +285,6 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			EnableTPM:                      b.config.EnableTPM,
-			MacAddress:                     b.config.MacAddress,
 			KeepRegistered:                 b.config.KeepRegistered,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DiskBlockSize:                  b.config.DiskBlockSize,
@@ -297,6 +295,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},
+
+		// Don't use the network adapters specified, we are cloning.  The clone should have created them.
 
 		&hypervcommon.StepMountDvdDrive{
 			Generation:      b.config.Generation,
@@ -321,11 +321,6 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Generation: b.config.Generation,
 		},
 
-		&hypervcommon.StepConfigureVlan{
-			VlanId:       b.config.VlanId,
-			SwitchVlanId: b.config.SwitchVlanId,
-		},
-
 		&hypervcommon.StepSetBootOrder{
 			BootOrder: b.config.BootOrder,
 		},
@@ -335,14 +330,12 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 
 		&hypervcommon.StepRun{
-			Headless:   b.config.Headless,
-			SwitchName: b.config.SwitchName,
+			Headless: b.config.Headless,
 		},
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand:   b.config.FlatBootCommand(),
 			BootWait:      b.config.BootWait,
-			SwitchName:    b.config.SwitchName,
 			Ctx:           b.config.ctx,
 			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},

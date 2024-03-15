@@ -26,9 +26,7 @@ type scriptOptions struct {
 	MemoryStartupBytes int64
 	NewVHDSizeBytes    int64
 	VHDBlockSizeBytes  int64
-	SwitchName         string
-	SwitchesNames      []string
-	MacAddresses       []string
+	MainSwitch         string
 	Generation         uint
 	DiffDisks          bool
 	FixedVHD           bool
@@ -357,12 +355,9 @@ $vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
     {{- end -}}
 {{- end }}
 
-Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName }}"
+Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .MainSwitch }}"
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
-{{ range $i, $switchName := .SwitchesNames }}
-Hyper-V\Add-VMNetworkAdapter -VMName "{{ $.VMName }}" -SwitchName "{{ $switchName }}"{{ if gt (len $.MacAddresses) $i }} -StaticMacAddress "{{ index $.MacAddresses $i }}".Replace("-","") {{ end }} 
-{{- end -}}
 `))
 
 	var b bytes.Buffer
@@ -401,7 +396,7 @@ func CheckVMName(vmName string) error {
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName string, switchesNames []string, macAddresses []string, generation uint,
+	diskSize int64, diskBlockSize int64, mainSwitch string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 	opts := scriptOptions{
 		Version:            version,
@@ -411,9 +406,7 @@ func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram 
 		MemoryStartupBytes: ram,
 		NewVHDSizeBytes:    diskSize,
 		VHDBlockSizeBytes:  diskBlockSize,
-		SwitchName:         switchName,
-		SwitchesNames:      switchesNames,
-		MacAddresses:       macAddresses,
+		MainSwitch:         mainSwitch,
 		Generation:         generation,
 		DiffDisks:          diffDisks,
 		FixedVHD:           fixedVHD,
@@ -516,23 +509,23 @@ Copy-Item $cloneFromVmcxPath $exportPath -Recurse -Force
 	return err
 }
 
-func SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+func SetVmNetworkAdapterMacAddress(adpName string, mac string) error {
 	var script = `
-param([string]$vmName, [string]$mac)
-Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac.Replace("-","")
+param([string]$adpName, [string]$mac)
+Hyper-V\Set-VMNetworkAdapter $adpName -staticmacaddress $mac.Replace("-","")
 	`
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, mac)
+	err := ps.Run(script, adpName, mac)
 
 	return err
 }
 
 func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
-	ram int64, switchName string, switchesNames []string, macAddresses []string, copyTF bool) error {
+	ram int64, mainSwitch string, copyTF bool) error {
 
 	var script = `
-param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy, [string[]]$switchesNames, [string[]]$macAddresses)
+param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy)
 
 $VirtualHarddisksPath = Join-Path -Path $importPath -ChildPath 'Virtual Hard Disks'
 if (!(Test-Path $VirtualHarddisksPath)) {
@@ -578,29 +571,21 @@ Hyper-V\Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupByt
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
 Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
-foreach ($switch in $switchesNames) {
-if ($macAddresses[$switchesNames.IndexOf($switch)] -ne $null) {
-	Hyper-V\Add-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch -StaticMacAddress $macAddresses[$switchesNames.IndexOf($switch)].Replace("-","")
-} else {
-   	Hyper-V\Add-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switch
-}
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
 if ($vm) {
     $result = Hyper-V\Rename-VM -VM $vm -NewName $VMName
 }
 	`
-	switchesArray := strings.Join(switchesNames, ",")
-	macAddressesArray := strings.Join(macAddresses, ",")
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName, strconv.FormatBool(copyTF), switchesArray, macAddressesArray)
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), mainSwitch, strconv.FormatBool(copyTF))
 
 	return err
 }
 
 func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
-	path string, harddrivePath string, ram int64, switchName string, switchesNames []string, macAddresses []string, copyTF bool) error {
+	path string, harddrivePath string, ram int64, mainSwitch string, copyTF bool) error {
 
 	if cloneFromVmName != "" {
 		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
@@ -615,7 +600,7 @@ func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 		}
 	}
 
-	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName, switchesNames, macAddresses, copyTF); err != nil {
+	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, mainSwitch, copyTF); err != nil {
 		return err
 	}
 
@@ -1172,6 +1157,21 @@ Hyper-V\Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 	return err
 }
 
+func CreateVirtualMachineNetworkAdapter(vmName, adpName, switchName string, legacy bool) error {
+	var script = `
+param([string]$vmName,[string]$adpName,[string]$switchName,[string]$legacyString)
+$legacy = [System.Boolean]::Parse($legacyString)
+Add-VMNetworkAdapter -VMName $vmName -SwitchName $switchName -Name $adpName -IsLegacy $legacy
+`
+	legacyString := "False"
+	if legacy {
+		legacyString = "True"
+	}
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, adpName, switchName, legacyString)
+	return err
+}
+
 func ReplaceVirtualMachineNetworkAdapter(vmName string, legacy bool) error {
 
 	var script = `
@@ -1214,10 +1214,14 @@ foreach ($adapter in $adapters) {
 	return switchName, nil
 }
 
-func CreateExternalVirtualSwitch(vmName string, switchName string) error {
+func CreateExternalVirtualSwitch(switchName string) (bool, error) {
 
 	var script = `
-param([string]$vmName,[string]$switchName)
+param([string]$switchName)
+$switches = Hyper-V\Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
+if ($switches.Count -ne 0) {
+	return $false
+}
 $switch = $null
 $names = @('ethernet','wi-fi','lan')
 $adapters = foreach ($name in $names) {
@@ -1236,15 +1240,18 @@ foreach ($adapter in $adapters) {
   }
 }
 
-if($switch -ne $null) {
-  Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter -VMSwitch $switch
-} else {
+if($switch -eq $null) {
   Write-Error 'No internet adapters found'
+  return $false
 }
+
+return $true
 `
+
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, switchName)
-	return err
+	cmdOut, err := ps.Output(script, switchName)
+	var created = strings.TrimSpace(cmdOut) == "True"
+	return created, err
 }
 
 func GetVirtualMachineSwitchName(vmName string) (string, error) {

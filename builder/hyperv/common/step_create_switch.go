@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	SwitchTypeExternal = "External"
 	SwitchTypeInternal = "Internal"
 	SwitchTypePrivate  = "Private"
 	DefaultSwitchType  = SwitchTypeInternal
@@ -21,19 +22,10 @@ const (
 //
 // Produces:
 //
-//	SwitchName string - The name of the Switch
+//	SwitchConfigs []SwitchConfigs - The new swichConfigs
 type StepCreateSwitches struct {
-	// Specifies the name of the switch to be created.
-	MainSwitchName string
-	SwitchesNames  []string
-	// Specifies the type of the switch to be created. Allowed values are Internal and Private. To create an External
-	// virtual switch, specify either the NetAdapterInterfaceDescription or the NetAdapterName parameter, which
-	// implicitly set the type of the virtual switch to External.
-	SwitchType string
-	// Specifies the name of the network adapter to be bound to the switch to be created.
-	NetAdapterName string
-	// Specifies the interface description of the network adapter to be bound to the switch to be created.
-	NetAdapterInterfaceDescription string
+	// Specifies the switches to be created.
+	SwitchConfigs []SwitchConfig
 
 	createdSwitch []bool
 }
@@ -42,38 +34,39 @@ func (s *StepCreateSwitches) Run(ctx context.Context, state multistep.StateBag) 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 
-	if len(s.SwitchType) == 0 {
-		s.SwitchType = DefaultSwitchType
-	}
-
-	switches := append([]string{s.MainSwitchName}, s.SwitchesNames...)
-
-	for index, switchName := range switches {
-		ui.Say(fmt.Sprintf("Creating switch '%v' if required...", switchName))
-		createdSwitch, err := driver.CreateVirtualSwitch(switchName, s.SwitchType)
+	for index, sw := range s.SwitchConfigs {
+		ui.Say(fmt.Sprintf("Creating switch '%v' if required...", sw.SwitchName))
+		if len(sw.SwitchType) == 0 {
+			sw.SwitchType = DefaultSwitchType
+		}
+		var createdSwitch bool
+		var err error
+		if sw.SwitchType == SwitchTypeExternal {
+			createdSwitch, err = driver.CreateExternalVirtualSwitch(sw.SwitchName)
+		} else {
+			createdSwitch, err = driver.CreateVirtualSwitch(sw.SwitchName, sw.SwitchType)
+		}
 		if err != nil {
-			err := fmt.Errorf("Error creating switch: %s", err)
-			state.Put("error", err)
+			verr := fmt.Errorf("Error creating switch: %s: %v", sw.SwitchName, err)
+			state.Put("error", verr)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-
+		if index == 0 {
+			state.Put("swName", sw.SwitchName)
+		}
 		s.createdSwitch = append(s.createdSwitch, createdSwitch)
 
 		if !s.createdSwitch[index] {
-			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", switchName))
+			ui.Say(fmt.Sprintf("    switch '%v' already exists. Will not delete on cleanup...", sw.SwitchName))
 		}
 	}
-
-	// Set the final name in the state bag so others can use it
-	state.Put("SwitchName", s.MainSwitchName)
-	state.Put("SwitchesNames", s.SwitchesNames)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepCreateSwitches) Cleanup(state multistep.StateBag) {
-	if s.MainSwitchName == "" && len(s.SwitchesNames) == 0 {
+	if len(s.SwitchConfigs) == 0 {
 		return
 	}
 
@@ -81,11 +74,9 @@ func (s *StepCreateSwitches) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Unregistering and deleting switch...")
 
-	switches := append([]string{s.MainSwitchName}, s.SwitchesNames...)
-
-	for index, switchName := range switches {
+	for index, sw := range s.SwitchConfigs {
 		if s.createdSwitch[index] {
-			err := driver.DeleteVirtualSwitch(switchName)
+			err := driver.DeleteVirtualSwitch(sw.SwitchName)
 			if err != nil {
 				ui.Error(fmt.Sprintf("Error deleting switch: %s", err))
 			}

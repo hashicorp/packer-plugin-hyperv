@@ -54,35 +54,32 @@ type Driver interface {
 	GetVirtualMachineNetworkAdapterAddress(string) (string, error)
 
 	//Set the vlan to use for switch
-	SetNetworkAdapterVlanId(string, string) error
-
-	//Set the vlan to use for machine
+	CreateVirtualMachineNetworkAdapter(string, string, string, bool) error
 	SetVirtualMachineVlanId(string, string) error
-
+	//Set the vlan to use for machine
+	SetNetworkAdapterVlanId(string, string) error
 	SetVmNetworkAdapterMacAddress(string, string) error
 
 	//Replace the network adapter with a (non-)legacy adapter
 	ReplaceVirtualMachineNetworkAdapter(string, bool) error
 
+	// Not used currently and likely broken.
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
-
-	CreateExternalVirtualSwitch(string, string) error
-
+	ConnectVirtualMachineNetworkAdapterToSwitch(string, string) error
 	GetVirtualMachineSwitchName(string) (string, error)
 
-	ConnectVirtualMachineNetworkAdapterToSwitch(string, string) error
-
+	// Switch Management Functions
 	CreateVirtualSwitch(string, string) (bool, error)
-
+	CreateExternalVirtualSwitch(string) (bool, error)
 	DeleteVirtualSwitch(string) error
 
 	CheckVMName(string) error
 
-	CreateVirtualMachine(string, string, string, int64, int64, int64, string, []string, []string, uint, bool, bool, string) error
+	CreateVirtualMachine(string, string, string, int64, int64, int64, string, uint, bool, bool, string) error
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, []string, []string, bool) error
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
 
 	ResizeVirtualMachineVhd(string, uint64) error
 
