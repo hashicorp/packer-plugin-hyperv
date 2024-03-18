@@ -347,6 +347,8 @@ In HCL2:
   The Hyper-V manager.
   The resulting VM will be housed in a randomly generated folder under %TEMP% by default.
   You can set the `temp_path` variable to change the location of the folder.
+  
+  **NB** `keep_registered` is mutually exclusive with `skip_export`.
 
 - `skip_compaction` (bool) - If true skip compacting the hard disk for
   the virtual machine when exporting. This defaults to false.
@@ -356,6 +358,8 @@ In HCL2:
   option. The resulting VHD/VHDX file will be output to
   <output_directory>/Virtual Hard Disks. By default this option is false
   and Packer will export the VM to output_directory.
+  
+  **NB** `skip_export` is mutually exclusive with `keep_registered`.
 
 - `headless` (bool) - Packer defaults to building Hyper-V virtual
   machines by launching a GUI that shows the console of the machine being
