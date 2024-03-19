@@ -6,7 +6,6 @@ package vmcx
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -44,7 +43,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -69,7 +68,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -106,7 +105,7 @@ func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -130,7 +129,7 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -178,7 +177,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -213,7 +212,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -258,7 +257,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -337,7 +336,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -379,7 +378,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -404,7 +403,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config := testConfig()
 
 		//Create vmcx folder
-		td, err := ioutil.TempDir("", "packer")
+		td, err := os.MkdirTemp("", "packer")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -441,7 +440,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config := testConfig()
 
 		//Create vmcx folder
-		td, err := ioutil.TempDir("", "packer")
+		td, err := os.MkdirTemp("", "packer")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -479,7 +478,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	td, err := os.MkdirTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
