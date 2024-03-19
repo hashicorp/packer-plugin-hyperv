@@ -196,14 +196,12 @@ func createArgs(filename string, params ...string) []string {
 
 func GetHostAvailableMemory() float64 {
 
-	var script = "(Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory"
+	var script = "(Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory / 1024"
 
 	var ps PowerShellCmd
 	output, _ := ps.Output(script)
 
 	freeMB, _ := strconv.ParseFloat(output, 64)
-
-	freeMB = freeMB / 1024.0
 
 	return freeMB
 }
