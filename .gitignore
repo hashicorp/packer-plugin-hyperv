@@ -1,4 +1,5 @@
 main
 dist/*
 packer-plugin-scaffolding
+packer-plugin-hyperv
 .docs

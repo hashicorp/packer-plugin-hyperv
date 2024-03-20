@@ -17,7 +17,6 @@ import (
 type StepRun struct {
 	GuiCancelFunc context.CancelFunc
 	Headless      bool
-	SwitchName    string
 	vmName        string
 }
 
@@ -25,9 +24,17 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
+	swName := state.Get("swName").(string) // This is set by the create_switches for create or the builder for clone
+
+	if swName == "" {
+		err := fmt.Errorf("Error getting main switch name")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	ui.Say("Determine Host IP for HyperV machine...")
-	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
+	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(swName)
 	if err != nil {
 		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
 		state.Put("error", err)
