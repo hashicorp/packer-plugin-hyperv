@@ -261,6 +261,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Content:     b.config.FloppyConfig.FloppyContent,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
