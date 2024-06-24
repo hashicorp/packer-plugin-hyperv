@@ -145,14 +145,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		b.config.Cpu = 1
 	}
 
-	if b.config.Generation == 2 {
-		if b.config.UseLegacyNetworkAdapter {
-			err = errors.New("Generation 2 vms don't support legacy network adapters.")
-			errs = packersdk.MultiErrorAppend(errs, err)
-		}
+	// Errors
+
+	if b.config.Generation == 2 && b.config.UseLegacyNetworkAdapter {
+		err = errors.New("Generation 2 vms don't support legacy network adapters.")
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
-	// Errors
+	if b.config.SkipExport && b.config.KeepRegistered {
+		err = errors.New("skip_export and keep_registered are mutually exclusive.")
+		errs = packersdk.MultiErrorAppend(errs, err)
+	}
 
 	if b.config.Generation > 1 && b.config.FixedVHD {
 		err = errors.New("Fixed VHD disks are only supported on Generation 1 virtual machines.")
