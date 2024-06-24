@@ -74,24 +74,35 @@ type CommonConfig struct {
 	// without the file extension. By default this is "packer-BUILDNAME",
 	// where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name" required:"false"`
-	// The name of the switch to connect the virtual
+	// The name of the main switch to connect the virtual
 	// machine to. By default, leaving this value unset will cause Packer to
 	// try and determine the switch to use by looking for an external switch
 	// that is up and running.
 	SwitchName string `mapstructure:"switch_name" required:"false"`
+	// The type of the main switch to connect the virtual
+	// machine to. By default, leaving this value unset will cause Packer to
+	// try and determine the switch to use by looking for an external switch
+	// that is up and running.
+	SwitchType string `mapstructure:"switch_type" required:"false"`
 	// This is the VLAN of the virtual switch's
-	// network card. By default none is set. If none is set then a VLAN is not
+	// network card. By default, none is set. If none is set then a VLAN is not
 	// set on the switch's network card. If this value is set it should match
 	// the VLAN specified in by vlan_id.
 	SwitchVlanId string `mapstructure:"switch_vlan_id" required:"false"`
 	// This allows a specific MAC address to be used on
-	// the default virtual network card. The MAC address must be a string with
+	// the default main virtual network card. The MAC address must be a string with
 	// no delimiters, for example "0000deadbeef".
 	MacAddress string `mapstructure:"mac_address" required:"false"`
 	// This is the VLAN of the virtual machine's network
 	// card for the new virtual machine. By default none is set. If none is set
 	// then VLANs are not set on the virtual machine's network card.
 	VlanId string `mapstructure:"vlan_id" required:"false"`
+	// This allows for multiple switches to be configured.
+	// This should be used exclusively with SwitchName, SwitchVlanId, and MacAddress.
+	SwitchConfigs []SwitchConfig `mapstructure:"switch_config" required:"false"`
+	// This allows for multiple switches to be configured.
+	// This should be used exclusively with MacAddress and VlanId.
+	AdapterConfigs []AdapterConfig `mapstructure:"adapter_config" required:"false"`
 	// The number of CPUs the virtual machine should use. If
 	// this isn't specified, the default is 1 CPU.
 	Cpu uint `mapstructure:"cpus" required:"false"`
@@ -197,9 +208,110 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 		log.Printf("%s: %v", "VMName", c.VMName)
 	}
 
-	if c.SwitchName == "" {
-		c.SwitchName = c.detectSwitchName(pc.PackerBuildName)
-		log.Printf("Using switch %s", c.SwitchName)
+	// Validation of switch config and switch parameters
+	// The end result of this section is the unification of all Switch Parameters into SwitchConfigs.
+	if (c.SwitchName != "" || c.SwitchType != "" || c.SwitchVlanId != "" || c.MacAddress != "" || c.VlanId != "") &&
+		(len(c.AdapterConfigs) > 0 || len(c.SwitchConfigs) > 0) {
+		err := fmt.Errorf("SwitchName/SwitchType/SwitchVlanId/MacAddress/VlanId and SwitchConfig/AdapterConfig not allowed.")
+		errs = append(errs, err)
+	} else {
+		if c.SwitchName != "" || c.SwitchType != "" || c.SwitchVlanId != "" || c.MacAddress != "" || c.VlanId != "" {
+			if c.SwitchType != "" {
+				warns = append(warns, "SwitchType is deprecated and should be converted to SwitchConfigs")
+			}
+			if c.SwitchName != "" {
+				warns = append(warns, "SwitchName is deprecated and should be converted to SwitchConfigs")
+			} else {
+				c.SwitchName = c.detectSwitchName(pc.PackerBuildName)
+				if c.SwitchType == "" {
+					c.SwitchType = SwitchTypeExternal
+				}
+				log.Printf("Using switch %s", c.SwitchName)
+			}
+			if c.SwitchVlanId != "" {
+				warns = append(warns, "SwitchVlanId is deprecated and should be converted to SwitchConfigs")
+			}
+			if c.MacAddress != "" {
+				warns = append(warns, "MacAddress is deprecated and should be converted to SwitchConfigs")
+			}
+			if c.VlanId != "" {
+				warns = append(warns, "VlanId is deprecated and should be converted to SwitchConfigs")
+			}
+			if c.SwitchVlanId != "" {
+				if c.SwitchVlanId != c.VlanId {
+					warning := fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor " +
+						"vlan. The switch will not be able to see traffic from the VM.")
+					warns = Appendwarns(warns, warning)
+				}
+			}
+
+			c.SwitchConfigs = []SwitchConfig{{
+				SwitchName:   c.SwitchName,
+				SwitchType:   c.SwitchType,
+				SwitchVlanId: c.SwitchVlanId,
+			}}
+			c.AdapterConfigs = []AdapterConfig{{
+				Name:       c.VMName,
+				VlanId:     c.VlanId,
+				MacAddress: c.MacAddress,
+				SwitchName: c.SwitchName,
+			}}
+
+			// Make sure we don't get confused....
+			c.VlanId = ""
+			c.MacAddress = ""
+			c.SwitchName = ""
+			c.SwitchType = ""
+			c.SwitchVlanId = ""
+		} else {
+			// If switchConfigs and adapterConfigs are not 0, assume the user knows what they are doing somewhat.
+			// Make sure the structs are valid, but don't create things for them.
+			if len(c.SwitchConfigs) == 0 {
+				swname := c.detectSwitchName(pc.PackerBuildName)
+				log.Printf("Using switch %s", swname)
+				c.SwitchConfigs = []SwitchConfig{{SwitchName: swname}}
+			}
+			for ii, sw := range c.SwitchConfigs {
+				if sw.SwitchName == "" {
+					err := fmt.Errorf("SwitchName for Switch(%d) requires a name", ii)
+					errs = append(errs, err)
+				}
+			}
+			if c.SwitchConfigs[0].SwitchType == "" {
+				c.SwitchConfigs[0].SwitchType = SwitchTypeExternal
+			}
+			if len(c.AdapterConfigs) == 0 {
+				c.AdapterConfigs = []AdapterConfig{}
+				for ii, sw := range c.SwitchConfigs {
+					name := c.VMName
+					if ii != 0 {
+						name = fmt.Sprintf("%s-%d", c.VMName, ii)
+					}
+					c.AdapterConfigs = append(c.AdapterConfigs, AdapterConfig{Name: name, SwitchName: sw.SwitchName})
+				}
+			} else {
+				for ii, adp := range c.AdapterConfigs {
+					found := false
+					for _, sw := range c.SwitchConfigs {
+						if sw.SwitchName == adp.SwitchName {
+							found = true
+							break
+						}
+					}
+					if !found {
+						err := fmt.Errorf("Network Adapter %d (%s) requires a switch that is not defined: %s", ii, adp.Name, adp.SwitchName)
+						errs = append(errs, err)
+					}
+					if adp.Name == "" {
+						name := c.VMName
+						if ii != 0 {
+							name = fmt.Sprintf("%s-%d", c.VMName, ii)
+						}
+						adp.Name = name
+					}
+				}
+			}
+		}
 	}
 
 	if c.Generation < 1 || c.Generation > 2 {
@@ -333,14 +445,6 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 		}
 	}
 
-	if c.SwitchVlanId != "" {
-		if c.SwitchVlanId != c.VlanId {
-			warning := fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor " +
-				"vlan. The switch will not be able to see traffic from the VM.")
-			warns = Appendwarns(warns, warning)
-		}
-	}
-
 	err := c.checkDiskBlockSize()
 	if err != nil {
 		errs = append(errs, err)
@@ -388,7 +492,7 @@ func (c *CommonConfig) checkHostAvailableMemory() string {
 		freeMB := powershell.GetHostAvailableMemory()
 
 		if (freeMB - float64(c.RamSize)) < LowRam {
-			return "Hyper-V might fail to create a VM if there is not enough free memory in the system."
+			return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system. (%v, %v, %v)", freeMB, float64(c.RamSize), LowRam)
 		}
 	}
 

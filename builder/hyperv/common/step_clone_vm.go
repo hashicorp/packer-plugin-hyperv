@@ -25,7 +25,6 @@ type StepCloneVM struct {
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
 	VMName                         string
-	SwitchName                     string
 	CompareCopy                    bool
 	RamSize                        uint
 	Cpu                            uint
@@ -35,7 +34,6 @@ type StepCloneVM struct {
 	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	EnableTPM                      bool
-	MacAddress                     string
 	KeepRegistered                 bool
 	AdditionalDiskSize             []uint
 	DiskBlockSize                  uint
@@ -44,6 +42,7 @@ type StepCloneVM struct {
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
+	mainSwitch := state.Get("swName").(string)
 	ui.Say("Cloning virtual machine...")
 
 	path := state.Get("build_dir").(string)
@@ -66,7 +65,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName,
 		s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path,
-		harddrivePath, ramSize, s.SwitchName, s.CompareCopy)
+		harddrivePath, ramSize, mainSwitch, s.CompareCopy)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)
@@ -154,16 +153,6 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-		}
-	}
-
-	if s.MacAddress != "" {
-		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
-		if err != nil {
-			err := fmt.Errorf("Error setting MAC address: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
 		}
 	}
 
