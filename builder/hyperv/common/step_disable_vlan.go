@@ -14,6 +14,8 @@ import (
 type StepDisableVlan struct {
 }
 
+// XXX: This is not used either currently.
+
 func (s *StepDisableVlan) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
