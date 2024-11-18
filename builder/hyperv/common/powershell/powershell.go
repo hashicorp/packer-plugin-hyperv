@@ -347,6 +347,10 @@ param([string]$vmName)
 $generation = Hyper-V\Get-Vm -Name $vmName | %{$_.Generation}
 if (!$generation){
     $generation = 1
+} elseif ($generation.toString() -notmatch "\d"){
+	throw "Unable to parse VM generation. Are there multiple VMs with the name $vmName?"
+} else {
+	return $generation
 }
 return $generation
 `
