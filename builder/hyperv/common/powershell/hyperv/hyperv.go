@@ -718,8 +718,10 @@ func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateN
 	var script = `
 param([string]$vmName, [string]$enableSecureBootString, [string]$templateName)
 $cmdlet = Get-Command Hyper-V\Set-VMFirmware
+# We cannot modify SecureBoot Templates on VMs with a TPM enabled
+$tpmEnabled = Hyper-V\Get-VMSecurity -VMName $vmName | Select-Object -ExpandProperty TpmEnabled
 # The SecureBootTemplate parameter is only available in later versions
-if ($cmdlet.Parameters.SecureBootTemplate) {
+if ($cmdlet.Parameters.SecureBootTemplate -and !$tpmEnabled) {
 	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString -SecureBootTemplate $templateName
 } else {
 	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString
