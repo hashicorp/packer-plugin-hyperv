@@ -1381,11 +1381,14 @@ try {
     $ip_details = (Get-CimAssociatedInstance -InputObject $vm_info -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
 
     if ($null -eq $ip_details) {
-      return ""
-    }
-
-    $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
-    $ip = ($ip_addresses -split ";")[0]
+	  $ip = ((Get-NetNeighbor | Where-Object {$_.LinkLayerAddress.ToLower().Replace("-","") -eq (Hyper-V\Get-VMNetworkAdapter $vm.Name | select-object -first 1).MacAddress.ToLower()}) | Where-Object {$_.IPAddress -Match "\." } | select -first 1).IPAddress
+	  if ($null -eq $ip){
+		return ""
+	  }
+	} else {
+	  $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
+	  $ip = ($ip_addresses -split ";")[0]
+	}
   }
 } catch {
   return ""
