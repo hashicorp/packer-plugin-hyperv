@@ -622,7 +622,6 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 
 	step := &hypervcommon.StepTypeBootCommand{
 		BootCommand: b.config.FlatBootCommand(),
-		SwitchName:  b.config.SwitchName,
 		Ctx:         b.config.ctx,
 	}
 

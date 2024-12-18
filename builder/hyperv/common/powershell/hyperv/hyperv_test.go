@@ -17,7 +17,7 @@ func Test_getCreateVMScript(t *testing.T) {
 		MemoryStartupBytes: int64(1024),
 		NewVHDSizeBytes:    int64(8192),
 		VHDBlockSizeBytes:  int64(10),
-		SwitchName:         "hyperv-vmx-switch",
+		MainSwitch:         "hyperv-vmx-switch",
 		Generation:         uint(1),
 		DiffDisks:          true,
 		FixedVHD:           true,

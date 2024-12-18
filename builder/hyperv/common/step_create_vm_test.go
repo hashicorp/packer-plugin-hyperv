@@ -23,6 +23,7 @@ func TestStepCreateVM(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
+	state.Put("swName", "mainSwitch")
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("Bad action: %v", action)
 	}
@@ -47,6 +48,7 @@ func TestStepCreateVM_CheckVMNameErr(t *testing.T) {
 		"vm_name to a unique value")
 
 	// Test the run
+	state.Put("swName", "mainSwitch")
 	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("Bad action: %v", action)
 	}
