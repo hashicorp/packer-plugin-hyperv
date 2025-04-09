@@ -58,7 +58,7 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 		ui.Say("Attempting to connect with vmconnect...")
 		s.GuiCancelFunc, err = driver.Connect(vmName)
 		if err != nil {
-			log.Printf(fmt.Sprintf("Non-fatal error starting vmconnect: %s. continuing...", err))
+			log.Printf("Non-fatal error starting vmconnect: %s. continuing...", err)
 		}
 	}
 
