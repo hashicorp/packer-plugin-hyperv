@@ -42,18 +42,19 @@ func GetWSlTemp() (string, error) {
 	err := command.Run()
 
 	stderrString := strings.TrimSpace(stderr.String())
+	stdoutString := strings.TrimSpace(stdout.String())
 
 	if _, ok := err.(*exec.ExitError); ok {
-		err = fmt.Errorf("Error getting wsl TEMP dir: %s", stderrString)
+		err = fmt.Errorf("Error getting wsl TEMP dir (exec): %s", stderrString)
 		return "", err
 	}
 
-	if len(stderrString) > 0 {
-		err = fmt.Errorf("Error getting wsl TEMP dir: %s", stderrString)
+	if len(stdoutString) == 0 && len(stderrString) > 0 {
+		err = fmt.Errorf("Error getting wsl TEMP dir (stderr): \"%s\", %s", stdoutString, stderrString)
 		return "", err
 	}
 
-	return strings.TrimSpace(stdout.String()), err
+	return stdoutString, err
 }
 
 func ConvertWindowsPathToWSlPath(winPath string) (string, error) {

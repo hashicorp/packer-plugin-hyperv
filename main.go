@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/packer-plugin-sdk/plugin"
-
 	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
 	"github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
 	"github.com/hashicorp/packer-plugin-hyperv/version"
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
 func main() {

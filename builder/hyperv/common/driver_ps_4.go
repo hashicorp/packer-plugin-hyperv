@@ -149,8 +149,8 @@ func (d *HypervPS4Driver) SetVirtualMachineVlanId(vmName string, vlanId string) 
 	return hyperv.SetVirtualMachineVlanId(vmName, vlanId)
 }
 
-func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
-	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
+func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(adpName string, mac string) error {
+	return hyperv.SetVmNetworkAdapterMacAddress(adpName, mac)
 }
 
 // Replace the network adapter with a (non-)legacy adapter
@@ -162,8 +162,12 @@ func (d *HypervPS4Driver) UntagVirtualMachineNetworkAdapterVlan(vmName string, s
 	return hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 }
 
-func (d *HypervPS4Driver) CreateExternalVirtualSwitch(vmName string, switchName string) error {
-	return hyperv.CreateExternalVirtualSwitch(vmName, switchName)
+func (d *HypervPS4Driver) CreateVirtualMachineNetworkAdapter(vmName string, adpName string, switchName string, legacy bool) error {
+	return hyperv.CreateVirtualMachineNetworkAdapter(vmName, adpName, switchName, legacy)
+}
+
+func (d *HypervPS4Driver) CreateExternalVirtualSwitch(switchName string) (bool, error) {
+	return hyperv.CreateExternalVirtualSwitch(switchName)
 }
 
 func (d *HypervPS4Driver) GetVirtualMachineSwitchName(vmName string) (string, error) {
@@ -193,17 +197,17 @@ func (d *HypervPS4Driver) CheckVMName(vmName string) error {
 }
 
 func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool,
+	diskSize int64, diskBlockSize int64, mainSwitch string, generation uint, diffDisks bool,
 	fixedVHD bool, version string) error {
-	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, ram, diskSize, diskBlockSize, switchName,
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, ram, diskSize, diskBlockSize, mainSwitch,
 		generation, diffDisks, fixedVHD, version)
 }
 
 func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string,
-	ram int64, switchName string, copyTF bool) error {
+	ram int64, mainSwitch string, copyTF bool) error {
 	return hyperv.CloneVirtualMachine(cloneFromVmcxPath, cloneFromVmName, cloneFromSnapshotName,
-		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName, copyTF)
+		cloneAllSnapshots, vmName, path, harddrivePath, ram, mainSwitch, copyTF)
 }
 
 func (d *HypervPS4Driver) ResizeVirtualMachineVhd(vmName string, newSizeInBytes uint64) error {

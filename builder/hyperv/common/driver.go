@@ -54,26 +54,23 @@ type Driver interface {
 	GetVirtualMachineNetworkAdapterAddress(string) (string, error)
 
 	//Set the vlan to use for switch
-	SetNetworkAdapterVlanId(string, string) error
-
-	//Set the vlan to use for machine
+	CreateVirtualMachineNetworkAdapter(string, string, string, bool) error
 	SetVirtualMachineVlanId(string, string) error
-
+	//Set the vlan to use for machine
+	SetNetworkAdapterVlanId(string, string) error
 	SetVmNetworkAdapterMacAddress(string, string) error
 
 	//Replace the network adapter with a (non-)legacy adapter
 	ReplaceVirtualMachineNetworkAdapter(string, bool) error
 
+	// Not used currently and likely broken.
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
-
-	CreateExternalVirtualSwitch(string, string) error
-
+	ConnectVirtualMachineNetworkAdapterToSwitch(string, string) error
 	GetVirtualMachineSwitchName(string) (string, error)
 
-	ConnectVirtualMachineNetworkAdapterToSwitch(string, string) error
-
+	// Switch Management Functions
 	CreateVirtualSwitch(string, string) (bool, error)
-
+	CreateExternalVirtualSwitch(string) (bool, error)
 	DeleteVirtualSwitch(string) error
 
 	CheckVMName(string) error

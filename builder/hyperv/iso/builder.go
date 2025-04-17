@@ -224,12 +224,11 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
-		&hypervcommon.StepCreateSwitch{
-			SwitchName: b.config.SwitchName,
+		&hypervcommon.StepCreateSwitches{
+			SwitchConfigs: b.config.SwitchConfigs,
 		},
 		&hypervcommon.StepCreateVM{
 			VMName:                         b.config.VMName,
-			SwitchName:                     b.config.SwitchName,
 			RamSize:                        b.config.RamSize,
 			DiskSize:                       b.config.DiskSize,
 			DiskBlockSize:                  b.config.DiskBlockSize,
@@ -244,12 +243,16 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			UseLegacyNetworkAdapter:        b.config.UseLegacyNetworkAdapter,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
-			MacAddress:                     b.config.MacAddress,
 			FixedVHD:                       b.config.FixedVHD,
 			Version:                        b.config.Version,
 			KeepRegistered:                 b.config.KeepRegistered,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
+
+		&hypervcommon.StepConfigureAdapters{
+			UseLegacyNetworkAdapter: b.config.UseLegacyNetworkAdapter,
+			AdapterConfigs:          b.config.AdapterConfigs,
+		},
 
 		&hypervcommon.StepMountDvdDrive{
 			Generation:      b.config.Generation,
@@ -274,11 +277,6 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Generation: b.config.Generation,
 		},
 
-		&hypervcommon.StepConfigureVlan{
-			VlanId:       b.config.VlanId,
-			SwitchVlanId: b.config.SwitchVlanId,
-		},
-
 		&hypervcommon.StepSetBootOrder{
 			BootOrder: b.config.BootOrder,
 		},
@@ -288,14 +286,12 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 
 		&hypervcommon.StepRun{
-			Headless:   b.config.Headless,
-			SwitchName: b.config.SwitchName,
+			Headless: b.config.Headless,
 		},
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand:   b.config.FlatBootCommand(),
 			BootWait:      b.config.BootWait,
-			SwitchName:    b.config.SwitchName,
 			Ctx:           b.config.ctx,
 			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},

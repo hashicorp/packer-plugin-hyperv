@@ -280,23 +280,34 @@ In HCL2:
   without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
 
-- `switch_name` (string) - The name of the switch to connect the virtual
+- `switch_name` (string) - The name of the main switch to connect the virtual
+  machine to. By default, leaving this value unset will cause Packer to
+  try and determine the switch to use by looking for an external switch
+  that is up and running.
+
+- `switch_type` (string) - The type of the main switch to connect the virtual
   machine to. By default, leaving this value unset will cause Packer to
   try and determine the switch to use by looking for an external switch
   that is up and running.
 
 - `switch_vlan_id` (string) - This is the VLAN of the virtual switch's
-  network card. By default none is set. If none is set then a VLAN is not
+  network card. By default, none is set. If none is set then a VLAN is not
   set on the switch's network card. If this value is set it should match
   the VLAN specified in by vlan_id.
 
 - `mac_address` (string) - This allows a specific MAC address to be used on
-  the default virtual network card. The MAC address must be a string with
+  the default main virtual network card. The MAC address must be a string with
   no delimiters, for example "0000deadbeef".
 
 - `vlan_id` (string) - This is the VLAN of the virtual machine's network
   card for the new virtual machine. By default none is set. If none is set
   then VLANs are not set on the virtual machine's network card.
+
+- `switch_config` ([]SwitchConfig) - This allows for multiple switches to be configured.
+  This should be used exclusively with SwitchName, SwitchVlanId, and MacAddress.
+
+- `adapter_config` ([]AdapterConfig) - This allows for multiple switches to be configured.
+  This should be used exclusively with MacAddress and VlanId.
 
 - `cpus` (uint) - The number of CPUs the virtual machine should use. If
   this isn't specified, the default is 1 CPU.
