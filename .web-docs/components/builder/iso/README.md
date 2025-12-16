@@ -550,7 +550,7 @@ provisioner](/packer/docs/provisioner/file).
     * xorriso
     * mkisofs
     * hdiutil (normally found in macOS)
-    * oscdimg (normally found in Windows as part of the Windows ADK)
+    * oscdimg (normally found in Windows as part of the [Windows ADK](https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install))
 
 - `cd_content` (map[string]string) - Key/Values to add to the CD. The keys represent the paths, and the values
   contents. It can be used alongside `cd_files`, which is useful to add large
