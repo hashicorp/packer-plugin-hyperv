@@ -288,6 +288,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			KeepRegistered:                 b.config.KeepRegistered,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DiskBlockSize:                  b.config.DiskBlockSize,
+			ComPortPipePath:                b.config.ComPortPipePath,
 		},
 
 		&hypervcommon.StepResizeVhd{

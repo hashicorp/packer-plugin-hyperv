@@ -156,6 +156,10 @@ type CommonConfig struct {
 	// built. When this value is set to true, the machine will start without a
 	// console.
 	Headless bool `mapstructure:"headless" required:"false"`
+	// Path to a named pipe for COM1 serial output. When set, the VM's COM1
+	// port will be configured to output to this pipe, enabling capture of
+	// boot console output. Example: `\\.\pipe\packer-console`
+	ComPortPipePath string `mapstructure:"com_port_pipe_path" required:"false"`
 	// When configured, determines the device or device type that is given preferential
 	// treatment when choosing a boot device.
 	//

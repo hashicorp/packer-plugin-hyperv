@@ -248,6 +248,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			FixedVHD:                       b.config.FixedVHD,
 			Version:                        b.config.Version,
 			KeepRegistered:                 b.config.KeepRegistered,
+			ComPortPipePath:                b.config.ComPortPipePath,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 

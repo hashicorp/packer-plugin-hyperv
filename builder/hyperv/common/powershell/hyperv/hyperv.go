@@ -1627,3 +1627,13 @@ func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
 func DisconnectVirtualMachine(cancel context.CancelFunc) {
 	cancel()
 }
+
+func SetVMComPort(vmName string, number int, pipePath string) error {
+	var script = `
+param([string]$vmName, [int]$number, [string]$pipePath)
+Set-VMComPort -VMName $vmName -Number $number -Path $pipePath
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, strconv.Itoa(number), pipePath)
+	return err
+}
