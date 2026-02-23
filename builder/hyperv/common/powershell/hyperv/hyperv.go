@@ -633,6 +633,10 @@ param([string]$vmName)
 $generation = Hyper-V\Get-Vm -Name $vmName | %{$_.Generation}
 if (!$generation){
     $generation = 1
+} elseif ($generation.toString() -notmatch "\d"){
+	throw "Unable to parse VM generation. Are there multiple VMs with the same name?"
+} else {
+	return $generation
 }
 return $generation
 `
@@ -718,8 +722,14 @@ func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateN
 	var script = `
 param([string]$vmName, [string]$enableSecureBootString, [string]$templateName)
 $cmdlet = Get-Command Hyper-V\Set-VMFirmware
+
+# If the VM had a TPM initialized previously, we cannot modify the SecureBootTemplate setting
+$tpmEnabled = Hyper-V\Get-VMSecurity -VMName $vmName | Select-Object -ExpandProperty TpmEnabled
+# VMKeyProtector defaults to a 4-byte value if VM did not have a TPM initialized
+$keyProtector = Hyper-V\Get-VMKeyProtector -VMName $vmName
+
 # The SecureBootTemplate parameter is only available in later versions
-if ($cmdlet.Parameters.SecureBootTemplate) {
+if ($cmdlet.Parameters.SecureBootTemplate -and !$tpmEnabled -and $keyProtector.Length -eq 4) {
 	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString -SecureBootTemplate $templateName
 } else {
 	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString
@@ -749,8 +759,18 @@ Hyper-V\Disable-VMTPM -VMName $vmName
 	if enableTPM {
 		script = `
 param([string]$vmName)
-Hyper-V\Set-VMKeyProtector -VMName $vmName -NewLocalKeyProtector
-Hyper-V\Enable-VMTPM -VMName $vmName
+$tpmEnabled = Hyper-V\Get-VMSecurity -VMName $vmName | Select-Object -ExpandProperty TpmEnabled
+# VMKeyProtector defaults to a 4-byte value if VM did not have a TPM initialized
+$keyProtector = Hyper-V\Get-VMKeyProtector -VMName $vmName
+
+if (!$tpmEnabled) {
+	if ($keyProtector.Length -eq 4) {
+	    # TPM not initialized, start fresh
+		Hyper-V\Set-VMKeyProtector -VMName $vmName -NewLocalKeyProtector
+	}
+
+	Hyper-V\Enable-VMTPM -VMName $vmName
+}
 `
 	}
 
