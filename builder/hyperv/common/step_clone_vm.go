@@ -40,6 +40,7 @@ type StepCloneVM struct {
 	KeepRegistered                 bool
 	AdditionalDiskSize             []uint
 	DiskBlockSize                  uint
+	ComPortPipePath                string
 }
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -183,6 +184,16 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
 		if err != nil {
 			err := fmt.Errorf("Error setting MAC address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	if s.ComPortPipePath != "" {
+		err = driver.SetVirtualMachineComPort(s.VMName, 1, s.ComPortPipePath)
+		if err != nil {
+			err := fmt.Errorf("Error configuring COM port: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

@@ -137,4 +137,7 @@ type Driver interface {
 
 	// Disconnect disconnects to a VM specified by the context cancel function.
 	Disconnect(context.CancelFunc)
+
+	// SetVirtualMachineComPort configures a COM port to output to a named pipe.
+	SetVirtualMachineComPort(string, int, string) error
 }

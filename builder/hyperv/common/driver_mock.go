@@ -290,6 +290,12 @@ type DriverMock struct {
 
 	Disconnect_Called bool
 	Disconnect_Cancel context.CancelFunc
+
+	SetVirtualMachineComPort_Called     bool
+	SetVirtualMachineComPort_VmName     string
+	SetVirtualMachineComPort_PortNumber int
+	SetVirtualMachineComPort_PipePath   string
+	SetVirtualMachineComPort_Err        error
 }
 
 func (d *DriverMock) IsRunning(vmName string) (bool, error) {
@@ -672,4 +678,12 @@ func (d *DriverMock) Connect(vmName string) (context.CancelFunc, error) {
 func (d *DriverMock) Disconnect(cancel context.CancelFunc) {
 	d.Disconnect_Called = true
 	d.Disconnect_Cancel = cancel
+}
+
+func (d *DriverMock) SetVirtualMachineComPort(vmName string, portNumber int, pipePath string) error {
+	d.SetVirtualMachineComPort_Called = true
+	d.SetVirtualMachineComPort_VmName = vmName
+	d.SetVirtualMachineComPort_PortNumber = portNumber
+	d.SetVirtualMachineComPort_PipePath = pipePath
+	return d.SetVirtualMachineComPort_Err
 }

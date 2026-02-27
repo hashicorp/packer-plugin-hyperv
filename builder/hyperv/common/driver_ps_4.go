@@ -402,3 +402,8 @@ func (d *HypervPS4Driver) Connect(vmName string) (context.CancelFunc, error) {
 func (d *HypervPS4Driver) Disconnect(cancel context.CancelFunc) {
 	hyperv.DisconnectVirtualMachine(cancel)
 }
+
+// SetVirtualMachineComPort configures a COM port to output to a named pipe.
+func (d *HypervPS4Driver) SetVirtualMachineComPort(vmName string, portNumber int, pipePath string) error {
+	return hyperv.SetVMComPort(vmName, portNumber, pipePath)
+}
